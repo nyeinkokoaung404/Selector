@@ -1,32 +1,24 @@
 ##  IP scanner, Hidify and v2ray config, Warp Plus license cloner, cloudflare worker management,Free subscription link
 
-## اسکنر آیپی و ساخت کانفیگ هیدیفای و v2ray ، کلونر لایسنس وارپ پلاس ، مدیریت ورکرهای کلودفلر ، ساب رایگان
+## IP scanner and creation of Hidify and v2ray config, Warp Plus license cloner, cloudflare worker management, free sub
 
 
 
 ##  run
-## اجرا
+## Execution
 
 ```
-bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/Selector/main/Sel.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/Sel.sh)
 ```
 ---
 ## Install, After the initial installation, use the kl command to run the script
-## اسکربپت نصبی ، بعد از نصب اولیه از دستور kl برای اجرای اسکریپت استفاده کنید.
+## Installation script, after the initial installation, use the kl command to run the script.
 
 ```
-bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/Selector/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
 ```
 ---
-### آموزش کامل گزینه های اسکربپت 1 تا 6 :
-
-[آموزش کامل گزینه های اسکریپت](https://youtu.be/YWvv-ChtIXQ?si=XYjMQqxWWQfdzVcq)
-
----
-### آموزش کامل گزینه ۷و۸ ، مدیریت ورکر :
-
-[آموزش آپدیت اول](https://youtu.be/nneZfJfOyOY?si=zxnLM6J3voVQ6X9x)
-[آموزش آپدیت دوم](https://youtu.be/NgkxvlKFfLU?si=3jV5bJtJ9c2TeMHE)
+### Full training of Scribpet options 1 to 6:
 
 ---
 
