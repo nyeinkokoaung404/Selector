@@ -278,9 +278,9 @@ elif [ "$user_input" -eq 6 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/Hidify/main/inst.sh)
     KOL
 elif [ "$user_input" -eq 7 ]; then
-    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/workercreator/main/install.sh)
+    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/workercreator/main/install.sh)
 elif [ "$user_input" -eq 8 ]; then
-    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/workercreator/main/run.sh)
+    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/workercreator/main/run.sh)
 elif [ "$user_input" -eq 9 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/quick-sub/main/run.sh)
 elif [ "$user_input" -eq 10 ]; then
