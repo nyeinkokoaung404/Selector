@@ -11,7 +11,7 @@ echo -e "\e[1;35m*****************************************"
 echo ""
 
 echo -e "\e[1;36m*****************************************"
-echo -e "\e[1;32mPlease choose an option:(Type 99 to install selector)\e[0m"
+echo -e "\e[1;32mPlease choose an option:(Type 404 to install selector)\e[0m"
 echo -e "\e[1;36m1. \e[1;33mIPv4 scan\e[0m"
 echo -e "\e[1;36m2. \e[1;33mIPv6 scan\e[0m"
 echo -e "\e[1;36m3. \e[1;33mV2ray and MahsaNG wireguard config\e[0m"
@@ -289,9 +289,9 @@ elif [ "$user_input" -eq 11 ]; then
     bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
 elif [ "$user_input" -eq 12 ]; then
     git clone https://github.com/nyeinkokoaung404/udp-custom && cd udp-custom && chmod +x install.sh && ./install.sh
-elif [ "$user_input" -eq 99 ]; then
+elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
     echo -e "\e[1;32mAfter this, you can run the Selector with \e[1;36mkl \e[1;32mcommand\e[0m"
     else 
-    echo "Invalid input. Please enter between 1 and 9"
+    echo "Invalid input. Please enter between 1 and 12"
 fi
