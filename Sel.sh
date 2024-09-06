@@ -23,7 +23,7 @@ echo -e "\e[1;36m8. \e[1;33mRun Worker Creator (install it first)\e[0m"
 echo -e "\e[1;36m9. \e[1;33m Free subscription link (Hin VPN)\e[0m"
 echo -e "\e[1;36m10. \e[1;33m MHSanaei 3x-ui\e[0m"
 echo -e "\e[1;36m11. \e[1;33m Alireza0 3x-ui\e[0m"
-echo -e "\e[1;36m11. \e[1;33m 4-0-4 UDP Script\e[0m"
+echo -e "\e[1;36m12. \e[1;33m 4-0-4 UDP Script\e[0m"
 echo -e "\e[1;36m*****************************************"
 echo -en "\e[1;32mEnter your choice:\e[0m"
 read -r user_input
