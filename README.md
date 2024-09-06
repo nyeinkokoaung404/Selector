@@ -11,7 +11,7 @@
 bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/Sel.sh)
 ```
 ---
-## Install, After the initial installation, use the kl command to run the script
+## Install, After the initial installation, use the 404 command to run the script
 ## Installation script, after the initial installation, use the kl command to run the script.
 
 ```
