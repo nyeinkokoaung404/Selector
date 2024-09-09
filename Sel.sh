@@ -290,9 +290,11 @@ elif [ "$user_input" -eq 11 ]; then
     bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
 elif [ "$user_input" -eq 12 ]; then
     git clone https://github.com/nyeinkokoaung404/udp-custom && cd udp-custom && chmod +x install.sh && ./install.sh
+elif [ "$user_input" -eq 13 ]; then
+    apt-get update -y; apt-get upgrade -y; wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
 elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
     echo -e "\e[1;32mAfter this, you can run the Selector with \e[1;36mkl \e[1;32mcommand\e[0m"
     else 
-    echo "Invalid input. Please enter between 1 and 12"
+    echo "Invalid input. Please enter between 1 and 13"
 fi
