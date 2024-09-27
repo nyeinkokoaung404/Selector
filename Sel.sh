@@ -21,11 +21,17 @@ echo -e "\e[1;36m6. \e[1;33mHiddify config for 2.0 version or higher\e[0m"
 echo -e "\e[1;36m7. \e[1;33mInstall Worker Creator\e[0m"
 echo -e "\e[1;36m8. \e[1;33mRun Worker Creator (install it first)\e[0m"
 echo -e "\e[1;36m9. \e[1;33m Free subscription link (Hin VPN)\e[0m"
-echo -e "\e[1;36m10. \e[1;33m MHSanaei 3x-ui\e[0m"
-echo -e "\e[1;36m11. \e[1;33m Alireza0 3x-ui\e[0m"
-echo -e "\e[1;36m12. \e[1;33m 4-0-4 UDP Script\e[0m"
-echo -e "\e[1;36m13. \e[1;33m UDP Custom Manger\e[0m"
-echo -e "\e[1;36m14. \e[1;33m SSH Script\e[0m"
+echo -e "\e[1;36m10. \e[1;33mwireguard config for Hiddify and v2ray\e[0m"
+echo -e "\e[1;36m11. \e[1;33mCLEAN IP scanner\e[0m"
+echo -e "\e[1;36m12. \e[1;33mfastly CLEAN IP scanner\e[0m"
+echo -e "\e[1;36m*****************************************"
+echo -e "\e[1;35m*\e[0m \e[1;31mV\e[1;32mP\e[1;33mS\e[1;34mS\e[1;35mC\e[1;36mR\e[1;37mI\e[1;37mP\e[1;37mT\e[0m : \e[4;34mPANEL\e[0m         \e[1;35m"
+echo -e "\e[1;36m*****************************************"
+echo -e "\e[1;36m13. \e[1;33m MHSanaei 3x-ui\e[0m"
+echo -e "\e[1;36m14. \e[1;33m Alireza0 3x-ui\e[0m"
+echo -e "\e[1;36m15. \e[1;33m 4-0-4 UDP Script\e[0m"
+echo -e "\e[1;36m16. \e[1;33m UDP Custom Manger\e[0m"
+echo -e "\e[1;36m17. \e[1;33m SSH Script\e[0m"
 echo -e "\e[1;36m*****************************************"
 echo -en "\e[1;32mEnter your choice:\e[0m"
 read -r user_input
@@ -280,20 +286,26 @@ elif [ "$user_input" -eq 6 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/Hidify/main/inst.sh)
     KOL
 elif [ "$user_input" -eq 7 ]; then
-    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/workercreator/main/install.sh)
+    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/workercreator/main/install.sh)
 elif [ "$user_input" -eq 8 ]; then
-    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/workercreator/main/run.sh)
+    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/workercreator/main/run.sh)
 elif [ "$user_input" -eq 9 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/quick-sub/main/run.sh)
 elif [ "$user_input" -eq 10 ]; then
-    bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/wireguard-v2hiddify/main/install.sh)
 elif [ "$user_input" -eq 11 ]; then
-    bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/cfipscanner/main/ipscan.sh)
 elif [ "$user_input" -eq 12 ]; then
-    git clone https://github.com/nyeinkokoaung404/udp-custom && cd udp-custom && chmod +x install.sh && ./install.sh
+    bash <(curl -fsSL https://raw.githubusercontent.com/Kolandone/fastlyipscan/refs/heads/main/ipscan.sh)
 elif [ "$user_input" -eq 13 ]; then
-    wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh && chmod +x install.sh && bash install.sh
+    bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 elif [ "$user_input" -eq 14 ]; then
+    bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+elif [ "$user_input" -eq 15 ]; then
+    git clone https://github.com/nyeinkokoaung404/udp-custom && cd udp-custom && chmod +x install.sh && ./install.sh
+elif [ "$user_input" -eq 16 ]; then
+    wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh && chmod +x install.sh && bash install.sh
+elif [ "$user_input" -eq 17 ]; then
     apt-get update -y; apt-get upgrade -y; wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
 elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
