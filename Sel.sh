@@ -32,12 +32,12 @@ echo -e "|${GREEN}1.MHSanaei 3X-UI"
 echo -e "|${GREEN}2.Alireza0 3X-UI"
 echo -e "|${GREEN}3.4-0-4 UDP SCRIPT"
 echo -e "|${GREEN}4.UDP CUSTOM MANGER"
-echo -e "|${GREEN}5.SSH SCRIPT"
+echo -e "|${GREEN}5.DARKSSH-MANAGER"
 echo "+-----------------------------------------------------------------------+"                                                                                                
 echo -en "|${YELLOW}Please choose an option:"
+read -r user_input
 echo "+-----------------------------------------------------------------------+"
 # echo -en "\e[1;32mEnter your choice:\e[0m"
-read -r user_input
 
 # Execute the chosen option
 if [ "$user_input" -eq 1 ]; then
@@ -49,7 +49,7 @@ elif [ "$user_input" -eq 3 ]; then
 elif [ "$user_input" -eq 4 ]; then
     wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh && chmod +x install.sh && bash install.sh
 elif [ "$user_input" -eq 5 ]; then
-    apt-get update -y; apt-get upgrade -y; wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
+    wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
 elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
     echo -e "\e[1;32mAfter this, you can run the Selector with \e[1;36m404 \e[1;32mcommand\e[0m"
