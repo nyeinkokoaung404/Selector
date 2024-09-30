@@ -1,4 +1,4 @@
-## VPS MANGER
+## VPS MANGER SELECTOR
 ## run
 ## Execution
 
