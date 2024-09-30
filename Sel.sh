@@ -16,7 +16,7 @@ echo "|      \|_____|\  \       \ \  \/\  \       \|_____|\  \           |"
 echo "|             \ \__\       \ \_______\             \ \__\          |"
 echo "|              \|__|        \|_______|              \|__|          |"
 echo "+------------------------------------------------------------------+"
-echo -e "| Telegram Account : ${GREEN}@nkka404 ${NC}|For More : ${RED}Information..${NC} |"
+echo -e "| Telegram Account : ${GREEN}@nkka404 ${NC}|Telegram Channel : ${RED}t.me/channel_4_zero_4${NC} |"
 echo "+------------------------------------------------------------------+"
 echo ""
 
