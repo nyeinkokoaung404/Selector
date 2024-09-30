@@ -32,11 +32,11 @@ echo -e "\e[1;36m*********************************************************"
 # echo -e "\e[1;36m5. \e[1;33m SSH Script\e[0m"
 # echo -e "\e[1;36m*****************************************"
 echo "+------------------------------------------------------------------+"                                                                                                
-echo -e "|${GREEN}1.MHSanaei 3X-UI"    |${NC} 
-echo -e "|${GREEN}2.Alireza0 3X-UI"    |${NC} 
-echo -e "|${GREEN}3.4-0-4 UDP SCRIPT"  |${NC} 
-echo -e "|${GREEN}4.UDP CUSTOM MANGER" |${NC} 
-echo -e "|${GREEN}5.DARKSSH-MANAGER"   |${NC} 
+echo -e "|${GREEN}1.MHSanaei 3X-UI"
+echo -e "|${GREEN}2.Alireza0 3X-UI"
+echo -e "|${GREEN}3.4-0-4 UDP SCRIPT"
+echo -e "|${GREEN}4.UDP CUSTOM MANGER"
+echo -e "|${GREEN}5.DARKSSH-MANAGER"
 echo "+------------------------------------------------------------------+"                                                                                                
 echo -en "|${YELLOW}Please choose an option:"
 read -r user_input
