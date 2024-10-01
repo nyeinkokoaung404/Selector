@@ -34,7 +34,7 @@ echo -e "|${GREEN}5.DARKSSH-MANAGER"
 echo "+------------------------------------------------------------------+"
 echo -en "|${YELLOW}Please choose an option:"
 read -r user_input
-
+echo "+------------------------------------------------------------------+"
 # Execute the chosen option
 if [ "$user_input" -eq 0 ]; then
     apt update && apt upgrade -y
