@@ -31,6 +31,7 @@ echo -e "|${GREEN}2.Alireza0 3X-UI"
 echo -e "|${GREEN}3.4-0-4 UDP SCRIPT"
 echo -e "|${GREEN}4.UDP CUSTOM MANGER"
 echo -e "|${GREEN}5.DARKSSH-MANAGER"
+echo -e "|${GREEN}6.404-SSH-MANAGER"
 echo "+------------------------------------------------------------------+"
 echo -en "|${YELLOW}Please choose an option:"
 read -r user_input
@@ -48,6 +49,8 @@ elif [ "$user_input" -eq 4 ]; then
     wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh && chmod +x install.sh && bash install.sh
 elif [ "$user_input" -eq 5 ]; then
     wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
+elif [ "$user_input" -eq 6 ]; then
+    wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe; chmod 777 hehe;./hehe
 elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
     echo -e "\e[1;32mAfter this, you can run the Selector with \e[1;36m404 \e[1;32mcommand\e[0m"
