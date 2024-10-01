@@ -23,19 +23,22 @@ echo ""
 echo -e "\e[1;36m********************************************************************"
 echo -e "\e[1;32mPlease choose an option:(Type 404 to install selector)\e[0m"
 echo -e "\e[1;36m********************************************************************"
+echo ""
+echo "+------------------------------------------------------------------+"
+echo -e "|${GREEN}0.GET APT UPDATE & UPGRADE"
 echo -e "|${GREEN}1.MHSanaei 3X-UI"
 echo -e "|${GREEN}2.Alireza0 3X-UI"
 echo -e "|${GREEN}3.4-0-4 UDP SCRIPT"
 echo -e "|${GREEN}4.UDP CUSTOM MANGER"
 echo -e "|${GREEN}5.DARKSSH-MANAGER"
-echo "********************************************************************"                                                                                                
+echo "+------------------------------------------------------------------+"
 echo -en "|${YELLOW}Please choose an option:"
 read -r user_input
-# echo "+-----------------------------------------------------------------------+"
-# echo -en "\e[1;32mEnter your choice:\e[0m"
 
 # Execute the chosen option
-if [ "$user_input" -eq 1 ]; then
+if [ "$user_input" -eq 0 ]; then
+    apt update && apt upgrade -y
+elif [ "$user_input" -eq 1 ]; then
     bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 elif [ "$user_input" -eq 2 ]; then
     bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
