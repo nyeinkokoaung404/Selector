@@ -26,6 +26,7 @@ echo -e "********************************************************************"
 echo ""
 echo "+------------------------------------------------------------------+"
 echo -e "|${GREEN}0 ◇ GET APT UPDATE & UPGRADE"
+echo "+------------------------------------------------------------------+"
 echo -e "|${GREEN}1 ◇ MHSanaei 3X-UI"
 echo -e "|${GREEN}2 ◇ Alireza0 3X-UI"
 echo -e "|${GREEN}3 ◇ 4-0-4 UDP SCRIPT"
@@ -38,7 +39,7 @@ read -r user_input
 # echo "+------------------------------------------------------------------+"
 # Execute the chosen option
 if [ "$user_input" -eq 0 ]; then
-    apt update && apt upgrade -y
+    apt update -y && apt install -y curl socat wget
 elif [ "$user_input" -eq 1 ]; then
     bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 elif [ "$user_input" -eq 2 ]; then
@@ -55,5 +56,5 @@ elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
     echo -e "\e[1;32mAfter this, you can run the Selector with \e[1;36m404 \e[1;32mcommand\e[0m"
     else 
-    echo "Invalid input. Please enter between 1 and 5"
+    echo "Invalid input. Please enter between 1 and 6"
 fi
