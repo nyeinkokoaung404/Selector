@@ -13,6 +13,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/ma
 bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
 ```
 ---
-### Full training of Scribpet options 1 to 5:
+### Full training of Scribpet options 1 to 6:
 
 ---
