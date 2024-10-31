@@ -33,6 +33,8 @@ echo -e "|${GREEN}3 ◇ 4-0-4 UDP SCRIPT"
 echo -e "|${GREEN}4 ◇ UDP CUSTOM MANGER"
 echo -e "|${GREEN}5 ◇ DARKSSH-MANAGER"
 echo -e "|${GREEN}6 ◇ 404-SSH-MANAGER"
+echo -e "|${GREEN}7 ◇ ZI-VPN-INSTALLER"
+echo -e "|${GREEN}8 ◇ ZI-VPN-UNINSTALLER"
 echo "+------------------------------------------------------------------+"
 echo -en "|${YELLOW}Please choose an option:"
 read -r user_input
@@ -52,6 +54,10 @@ elif [ "$user_input" -eq 5 ]; then
     wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
 elif [ "$user_input" -eq 6 ]; then
     wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe; chmod 777 hehe;./hehe
+elif [ "$user_input" -eq 7 ]; then
+    wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh; sudo chmod +x zi.sh; sudo ./zi.sh
+elif [ "$user_input" -eq 8 ]; then
+    sudo wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh; sudo chmod +x ziun.sh; sudo ./ziun.sh
 elif [ "$user_input" -eq 404 ]; then
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
     echo -e "\e[1;32mAfter this, you can run the Selector with \e[1;36m404 \e[1;32mcommand\e[0m"
