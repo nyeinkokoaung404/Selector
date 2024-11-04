@@ -41,7 +41,7 @@ read -r user_input
 # echo "+------------------------------------------------------------------+"
 # Execute the chosen option
 if [ "$user_input" -eq 0 ]; then
-    apt update -y && apt install -y curl socat wget
+    apt update && apt upgrade -y
 elif [ "$user_input" -eq 1 ]; then
     bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 elif [ "$user_input" -eq 2 ]; then
