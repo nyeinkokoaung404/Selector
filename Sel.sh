@@ -40,21 +40,46 @@ show_system_info() {
 
 # Header with ASCII Art
 display_header() {
-    center "Server Management Toolkit"
-    echo ""
-    echo -e "${YELLOW}${BG_BLUE}"
-    cat << "EOF"
-+------------------------------------------------------------------+
-|     _________         _________          _________               |
-|    |\  \ |\  \        |\   __  \        |\  \ |\  \              |
-|    \ \  \|_\  \       \ \  \|\  \       \ \  \|_\  \             |
-|     \ \______  \       \ \  \/\  \       \ \______  \            |
-|      \|_____|\  \       \ \  \/\  \       \|_____|\  \           |
-|             \ \__\       \ \_______\             \ \__\          |
-|              \|__|        \|_______|              \|__|          |
-+------------------------------------------------------------------+
+    # Clear the terminal first
+    clear
+    
+    # Get terminal width
+    local termwidth=$(tput cols)
+    
+    # Create a full-width line
+    local full_line=$(printf '%*s' "$termwidth" | tr ' ' '═')
+    
+    # Display full-width colored line
+    echo -e "${BLUE}${full_line}${NC}"
+    
+    # Center the title
+    local title="Server Management Toolkit"
+    local padding=$(( (termwidth - ${#title}) / 2 ))
+    printf "%${padding}s" ""
+    echo -e "${BG_BLUE}${FG_WHITE}${title}${NC}"
+    
+    # Display ASCII art with proper centering
+    echo -e "${YELLOW}"
+    cat << "EOF" | awk -v termwidth="$termwidth" '
+    {
+        spaces = int((termwidth - 70) / 2)
+        printf "%" spaces "s%s\n", "", $0
+    }
+    '
+    +------------------------------------------------------------------+
+    |     _________         _________          _________               |
+    |    |\  \ |\  \        |\   __  \        |\  \ |\  \              |
+    |    \ \  \|_\  \       \ \  \|\  \       \ \  \|_\  \             |
+    |     \ \______  \       \ \  \/\  \       \ \______  \            |
+    |      \|_____|\  \       \ \  \/\  \       \|_____|\  \           |
+    |             \ \__\       \ \_______\             \ \__\          |
+    |              \|__|        \|_______|              \|__|          |
+    +------------------------------------------------------------------+
 EOF
     echo -e "${NC}"
+    
+    # Display full-width colored line again
+    echo -e "${BLUE}${full_line}${NC}"
 }
 
 # Main Menu
