@@ -51,6 +51,28 @@ center() {
     echo -e "${color}${border}${NC}"
 }
 
+# Display 404 ASCII art
+show_404() {
+    echo -e "\033[1;36m"
+    awk -v termwidth=$(tput cols) '
+    BEGIN {
+        print "╔══════════════════════════════════════════════════════════════════════════════╗"
+        print "║                                                                              ║"
+        print "║     /¯¯¯¯/\\¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯/\\¯¯¯¯\\               ║"
+        print "║     \\__\\/\\__\\/      \\__\\/      \\__\\/      \\__\\/    \\__\\/\\__\\/                ║"
+        print "║     /¯¯¯¯\\/¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\/¯¯¯¯\\               ║"
+        print "║     \\__/\\/\\__\\/      \\__\\/      \\__\\/      \\__\\/    \\__/\\/\\__\\/              ║"
+        print "║     /¯¯¯¯\\/¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\    /¯¯¯¯\\/¯¯¯¯\\               ║"
+        print "║     \\__\\/  \\__\\/    \\__\\/    \\__\\/    \\__\\/    \\__\\/  \\__\\/                  ║"
+        print "║                                                                              ║"
+        print "╚══════════════════════════════════════════════════════════════════════════════╝"
+    }
+    ' | while IFS= read -r line; do
+        printf "%*s\n" $(( (termwidth + 82) / 2 )) "$line"
+    done
+    echo -e "\033[0m"
+}
+
 # Animated progress spinner
 spinner() {
     local pid=$!
@@ -84,24 +106,7 @@ show_system_info() {
 # Beautiful header with ASCII art
 display_header() {
     clear
-    
-    # Get terminal width
-    local termwidth=$(tput cols)
-    
-    # Display header with gradient effect
-    echo -e "${BLUE}"
-    echo "╔══════════════════════════════════════════════════════════════════════════════╗" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║                                                                              ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║    ██████╗ ███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ██████╗     ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║    ██╔══██╗██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗    ██╔══██╗██╔══██╗    ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║    ██████╔╝█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝    ██████╔╝██████╔╝    ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║    ██╔══██╗██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██╗    ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║    ██║  ██║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║    ██║     ██║  ██║    ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝    ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║                                                                              ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "╚══════════════════════════════════════════════════════════════════════════════╝" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo -e "${NC}"
-    
+    show_404
     center "Server Management Toolkit v2.0" $PURPLE "═"
 }
 
