@@ -125,35 +125,35 @@ show_menu() {
     
     # System Management
     echo -e "${WHITE}│${NC} ${GREEN}System Management:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}0${NC} ◇ System Update & Upgrade"
-    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}1${NC} ◇ Clean System Cache"
-    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}2${NC} ◇ Check Disk Space"
+    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}[0]${NC} ◇ System Update & Upgrade"
+    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}[1]${NC} ◇ Clean System Cache"
+    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}[2]${NC} ◇ Check Disk Space"
     echo -e "${WHITE}│${NC}"
     
     # VPN Panels
     echo -e "${WHITE}│${NC} ${YELLOW}VPN Panels:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}10${NC} ◇ Install MHSanaei 3X-UI (Xray Panel)"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}11${NC} ◇ Install Alireza0 3X-UI (Alternative Panel)"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}12${NC} ◇ Install ZI-VPN"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}13${NC} ◇ Uninstall ZI-VPN"
+    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[10]${NC} ◇ Install MHSanaei 3X-UI (MHSanaei Xray Panel)"
+    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[11]${NC} ◇ Install Alireza0 3X-UI (Alternative Xray Panel)"
+    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[12]${NC} ◇ Install ZI-VPN"
+    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[13]${NC} ◇ Uninstall ZI-VPN"
     echo -e "${WHITE}│${NC}"
     
     # Speed Optimization
     echo -e "${WHITE}│${NC} ${CYAN}Speed Optimization:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${CYAN}20${NC} ◇ Install 4-0-4 UDP Speed Boost"
-    echo -e "${WHITE}│${NC} ${ARROW} ${CYAN}21${NC} ◇ Install UDP Custom Manager"
+    echo -e "${WHITE}│${NC} ${ARROW} ${CYAN}[20]${NC} ◇ Install 4-0-4 UDP Speed Boost"
+    echo -e "${WHITE}│${NC} ${ARROW} ${CYAN}[21]${NC} ◇ Install UDP Custom Manager"
     echo -e "${WHITE}│${NC}"
     
     # SSH Managers
     echo -e "${WHITE}│${NC} ${BLUE}SSH Managers:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}30${NC} ◇ Install DARKSSH Manager"
-    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}31${NC} ◇ Install 404-SSH Manager"
+    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[30]${NC} ◇ Install DARKSSH Manager"
+    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[31${NC} ◇ Install 404-SSH Manager"
     echo -e "${WHITE}│${NC}"
     
     # Tools
     echo -e "${WHITE}│${NC} ${MAGENTA}Tools:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${MAGENTA}40${NC} ◇ Install Selector Tool (404)"
-    echo -e "${WHITE}│${NC} ${ARROW} ${MAGENTA}41${NC} ◇ Server Benchmark"
+    echo -e "${WHITE}│${NC} ${ARROW} ${MAGENTA}[40]${NC} ◇ Install Selector Tool (404)"
+    echo -e "${WHITE}│${NC} ${ARROW} ${MAGENTA}[41]${NC} ◇ Server Benchmark"
     echo -e "${WHITE}│${NC}"
     
     # Other
@@ -167,19 +167,19 @@ show_menu() {
 install_option() {
     case $1 in
         0)
-            echo -e "${CHECK} Performing system update..."
+            echo -e "${CHECK} Performing System Update..."
             apt update && apt upgrade -y &
             spinner
-            echo -e "\n${CHECK} ${GREEN}System updated successfully!${NC}"
+            echo -e "\n${CHECK} ${GREEN}System Updated Successfully!${NC}"
             ;;
         1)
-            echo -e "${CHECK} Cleaning system cache..."
+            echo -e "${CHECK} Cleaning System Cache..."
             apt clean && apt autoclean &
             spinner
-            echo -e "\n${CHECK} ${GREEN}System cache cleaned!${NC}"
+            echo -e "\n${CHECK} ${GREEN}System Cache Cleaned!${NC}"
             ;;
         2)
-            echo -e "${CHECK} Checking disk space..."
+            echo -e "${CHECK} Checking Disk Space..."
             df -h
             ;;
         10)
@@ -234,7 +234,7 @@ install_option() {
             echo -e "\n${STAR} ${GREEN}Installation complete! You can now run the tool with '404' command.${NC}"
             ;;
         41)
-            echo -e "${CHECK} Running server benchmark..."
+            echo -e "${CHECK} Running Server Benchmark..."
             curl -sL yabs.sh | bash
             ;;
         *)
@@ -284,7 +284,7 @@ while true; do
             if [[ "$user_input" =~ ^[0-9]+$ ]]; then
                 install_option "$user_input"
                 echo -e "${LINE}"
-                echo -e "${CHECK} ${GREEN}Operation completed successfully!${NC}"
+                echo -e "${CHECK} ${GREEN}Operation Completed Successfully!${NC}"
                 echo -e "${STAR} ${YELLOW}Press any key to return to the menu...${NC}"
                 read -n 1 -s -r
             else
