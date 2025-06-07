@@ -51,29 +51,6 @@ center() {
     echo -e "${color}${border}${NC}"
 }
 
-# Display 404 ASCII art
-show_404() {
-    echo -e "\033[1;36m"
-    awk -v termwidth=$(tput cols) '
-    
-    BEGIN {
-        print "╔══════════════════════════════════════════════════════════════════════════════╗"
-        print "║     _________         _________          _________               
-║" 
-        print "║    |\  \ |\  \        |\   __  \        |\  \ |\  \              ║"
-        print "║    \ \  \|_\  \       \ \  \|\  \       \ \  \|_\  \             ║"
-        print "║     \ \______  \       \ \  \/\  \       \ \______  \            ║"
-        print "║      \|_____|\  \       \ \  \/\  \       \|_____|\  \           ║"
-        print "║             \ \__\       \ \_______\             \ \__\          ║"
-        print "║              \|__|        \|_______|              \|__|          ║"
-        print "╚══════════════════════════════════════════════════════════════════════════════╝"
-    }
-    ' | while IFS= read -r line; do
-        printf "%*s\n" $(( (termwidth + 82) / 2 )) "$line"
-    done
-    echo -e "\033[0m"
-}
-
 # Animated progress spinner
 spinner() {
     local pid=$!
@@ -107,7 +84,36 @@ show_system_info() {
 # Beautiful header with ASCII art
 display_header() {
     clear
-    show_404
+    
+    # Get terminal width
+    local termwidth=$(tput cols)
+    
+    # Display header with borders
+    echo -e "${BLUE}"
+    echo "╔══════════════════════════════════════════════════════════════════════════════╗" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
+    echo "║                                                                              ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
+    
+    # Display the requested ASCII art with proper centering
+    echo -e "${YELLOW}"
+    cat << "EOF" | awk -v termwidth="$termwidth" '
+    {
+        spaces = int((termwidth - 70) / 2)
+        printf "%" spaces "s%s\n", "", $0
+    }
+    '
+    |     _________         _________          _________               |
+    |    |\  \ |\  \        |\   __  \        |\  \ |\  \              |
+    |    \ \  \|_\  \       \ \  \|\  \       \ \  \|_\  \             |
+    |     \ \______  \       \ \  \/\  \       \ \______  \            |
+    |      \|_____|\  \       \ \  \/\  \       \|_____|\  \           |
+    |             \ \__\       \ \_______\             \ \__\          |
+    |              \|__|        \|_______|              \|__|          |
+EOF
+    echo -e "${BLUE}"
+    echo "║                                                                              ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
+    echo "╚══════════════════════════════════════════════════════════════════════════════╝" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
+    echo -e "${NC}"
+    
     center "Server Management Toolkit v2.0" $PURPLE "═"
 }
 
