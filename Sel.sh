@@ -192,41 +192,27 @@ install_option() {
             ;;
         12)
             echo -e "${CHECK} Installing ZI-VPN..."
-            wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
-            chmod +x zi.sh
-            ./zi.sh
+            wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh; sudo chmod +x zi.sh; sudo ./zi.sh
             ;;
         13)
             echo -e "${CHECK} Uninstalling ZI-VPN..."
-            wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
-            chmod +x ziun.sh
-            ./ziun.sh
+            wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh; sudo chmod +x ziun.sh; sudo ./ziun.sh
             ;;
         20)
             echo -e "${CHECK} Installing 4-0-4 UDP Script..."
-            git clone https://github.com/nyeinkokoaung404/udp-custom
-            cd udp-custom || exit
-            chmod +x install.sh
-            ./install.sh
-            cd ..
+            git clone https://github.com/nyeinkokoaung404/udp-custom && cd udp-custom && chmod +x install.sh && ./install.sh
             ;;
         21)
             echo -e "${CHECK} Installing UDP Custom Manager..."
-            wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
-            chmod +x install.sh
-            bash install.sh
+            wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh && chmod +x install.sh && bash install.sh
             ;;
         30)
             echo -e "${CHECK} Installing DARKSSH Manager..."
-            wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark
-            chmod 777 Dark
-            ./Dark
+            wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
             ;;
         31)
             echo -e "${CHECK} Installing 404-SSH Manager..."
-            wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe
-            chmod 777 hehe
-            ./hehe
+            wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe; chmod 777 hehe;./hehe
             ;;
         40)
             echo -e "${CHECK} Installing Selector Tool..."
@@ -238,7 +224,7 @@ install_option() {
             curl -sL yabs.sh | bash
             ;;
         *)
-            echo -e "${CROSS} ${RED}Invalid option!${NC}"
+            echo -e "${CROSS} ${RED}Invalid Option!${NC}"
             return 1
             ;;
     esac
@@ -252,10 +238,10 @@ show_help() {
     echo -e "${ARROW} ${YELLOW}Each option will download and install the selected software automatically.${NC}"
     echo -e "${ARROW} ${RED}Ensure you have proper permissions before running installations.${NC}"
     echo -e "\n${STAR} ${BLUE}Key Features:${NC}"
-    echo -e "  ${DIAMOND} System maintenance tools"
-    echo -e "  ${DIAMOND} VPN panel installations"
-    echo -e "  ${DIAMOND} Network speed optimization"
-    echo -e "  ${DIAMOND} SSH management utilities"
+    echo -e "  ${DIAMOND} System Maintenance Tools"
+    echo -e "  ${DIAMOND} VPN Xray Panel Installations"
+    echo -e "  ${DIAMOND} Network Speed Optimization"
+    echo -e "  ${DIAMOND} SSH Management Utilities"
     echo -e "${DOUBLE_LINE}"
 }
 
