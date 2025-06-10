@@ -147,7 +147,7 @@ show_menu() {
     # SSH Managers
     echo -e "${WHITE}│${NC} ${BLUE}SSH Managers:${NC}"
     echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[30]${NC} ◇ Install DARKSSH Manager"
-    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[31${NC} ◇ Install 404-SSH Manager"
+    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[31]${NC} ◇ Install 404-SSH Manager"
     echo -e "${WHITE}│${NC}"
     
     # Tools
