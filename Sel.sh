@@ -52,7 +52,7 @@ if ! command -v figlet &> /dev/null; then
 fi
 
 ## ---------------------------
-## Functions (Paired Layout)
+## Display Functions
 ## ---------------------------
 
 # Function to display centered text with borders
@@ -70,7 +70,7 @@ center() {
     echo -e "${color}${border}${NC}"
 }
 
-# Box drawing function
+# Improved box drawing function with proper content alignment
 draw_box() {
     local title="$1"
     local color="$2"
@@ -101,12 +101,13 @@ draw_box() {
     
     # Content lines
     while IFS= read -r line; do
-        line=${line//\\033\[[0-9;]*[mK]//}  # Remove color codes for length calculation
-        local line_len=${#line}
+        # Remove color codes for length calculation
+        clean_line=$(echo -e "$line" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+        local line_len=${#clean_line}
         local content_pad=$(( width - line_len - 3 ))
         
         echo -ne "${color}${BOX_VERT}${NC} "
-        echo -ne "$(echo "$line" | sed "s/\\\\033\[[0-9;]*m//g")"
+        echo -ne "$line"
         printf "%${content_pad}s" ""
         echo -e "${color}${BOX_VERT}${NC}"
     done <<< "$content"
@@ -117,16 +118,18 @@ draw_box() {
     echo -e "${BOX_CORNER_BR}${NC}"
 }
 
-# Display system information
+# Fixed system information display
 show_system_info() {
-    local sysinfo="\
-${STAR} ${GREEN}Hostname:${NC} $(hostname)\n\
-${STAR} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')\n\
-${STAR} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')\n\
-${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)\n\
-${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)\n\
-${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
-    
+    local sysinfo=$(cat <<EOF
+${STAR} ${GREEN}Hostname:${NC} $(hostname)
+${STAR} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')
+${STAR} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')
+${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
+${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)
+${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}' | tr -d ' ')
+${STAR} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
+EOF
+)
     draw_box "System Information" $GREEN 60 "$sysinfo"
 }
 
@@ -151,7 +154,10 @@ display_header() {
     echo -e "${PURPLE}$(printf '%*s' $termwidth | tr ' ' '═')${NC}"
 }
 
-# Beautiful menu with categories (paired layout)
+## ---------------------------
+## Menu Layout (Improved)
+## ---------------------------
+
 show_menu() {
     echo -e "\n"
     
@@ -163,7 +169,7 @@ show_menu() {
     echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${GREEN}║${NC}"
     echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${GREEN}║${NC}"
     echo -e "${GREEN}║                            ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${GREEN}║${NC}"
-    echo -e "${GREEN}╚════════════════════════════╩════════════════════════════╝${NC}"
+    echo -e "${GREEN}╚════════════════════════════╩════════════════════════════╝${NC}\n"
     
     # Speed Optimization and SSH Managers (side by side)
     echo -e "${CYAN}╔════════════════════════════╦════════════════════════════╗${NC}"
@@ -171,7 +177,7 @@ show_menu() {
     echo -e "${CYAN}╠════════════════════════════╬════════════════════════════╣${NC}"
     echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost       ║${ARROW} ${BLUE}[30] DARKSSH Manager    ${CYAN}║${NC}"
     echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager  ║${ARROW} ${BLUE}[31] 404-SSH Manager    ${CYAN}║${NC}"
-    echo -e "${CYAN}╚════════════════════════════╩════════════════════════════╝${NC}"
+    echo -e "${CYAN}╚════════════════════════════╩════════════════════════════╝${NC}\n"
     
     # Tools and Other Options (side by side)
     echo -e "${PURPLE}╔════════════════════════════╦════════════════════════════╗${NC}"
@@ -182,28 +188,10 @@ show_menu() {
     echo -e "${PURPLE}╚════════════════════════════╩════════════════════════════╝${NC}"
 }
 
-# Installation Functions (paired)
-install_option() {
-    case $1 in
-        0) system_update ;;
-        1) clean_cache ;;
-        2) check_disk ;;
-        10) install_mhsanaei ;;
-        11) install_alireza ;;
-        12) install_zivpn ;;
-        13) uninstall_zivpn ;;
-        20) install_404udp ;;
-        21) install_udpmanager ;;
-        30) install_darkssh ;;
-        31) install_404ssh ;;
-        40) install_selector ;;
-        41) run_benchmark ;;
-        *) draw_box "Error" $RED 60 "Invalid option selected!"; return 1 ;;
-    esac
-    return 0
-}
+## ---------------------------
+## Installation Functions
+## ---------------------------
 
-# Paired installation functions
 system_update() {
     draw_box "System Update & Upgrade" $GREEN 60 "Performing system update..."
     apt update && apt upgrade -y
@@ -285,7 +273,6 @@ run_benchmark() {
     curl -sL yabs.sh | bash
 }
 
-# Help Information
 show_help() {
     draw_box "HELP INFORMATION" $CYAN 60 "\
 ${ARROW} ${GREEN}This tool provides quick installation of server utilities.${NC}\n\
