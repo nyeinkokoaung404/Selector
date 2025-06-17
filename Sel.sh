@@ -52,7 +52,7 @@ if ! command -v figlet &> /dev/null; then
 fi
 
 ## ---------------------------
-## Functions
+## Functions (Paired Layout)
 ## ---------------------------
 
 # Function to display centered text with borders
@@ -106,7 +106,7 @@ draw_box() {
         local content_pad=$(( width - line_len - 3 ))
         
         echo -ne "${color}${BOX_VERT}${NC} "
-        echo -ne "$(echo "$line" | sed "s/\\\\033\[[0-9;]*m//g")"  # Temporary color removal for alignment
+        echo -ne "$(echo "$line" | sed "s/\\\\033\[[0-9;]*m//g")"
         printf "%${content_pad}s" ""
         echo -e "${color}${BOX_VERT}${NC}"
     done <<< "$content"
@@ -119,13 +119,15 @@ draw_box() {
 
 # Display system information
 show_system_info() {
-    draw_box "System Information" $GREEN 60 "\
+    local sysinfo="\
 ${STAR} ${GREEN}Hostname:${NC} $(hostname)\n\
 ${STAR} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')\n\
 ${STAR} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')\n\
 ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)\n\
 ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)\n\
 ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
+    
+    draw_box "System Information" $GREEN 60 "$sysinfo"
 }
 
 # Beautiful header with ASCII art
@@ -141,124 +143,146 @@ display_header() {
     }'
     echo -e "${NC}"
     
-    center "Server Management Toolkit v2.0" $PURPLE "═"
+    # Fixed header display
+    termwidth=$(tput cols)
+    title="Server Management Toolkit v2.0"
+    padding=$(( (termwidth - ${#title}) / 2 ))
+    printf "%*s${PURPLE}%s${NC}\n" $padding "" "$title"
+    echo -e "${PURPLE}$(printf '%*s' $termwidth | tr ' ' '═')${NC}"
 }
 
-# Beautiful menu with categories
+# Beautiful menu with categories (paired layout)
 show_menu() {
     echo -e "\n"
     
-    # System Management
-    draw_box "System Management" $GREEN 60 "\
-${ARROW} ${GREEN}[0]${NC} ◇ System Update & Upgrade\n\
-${ARROW} ${GREEN}[1]${NC} ◇ Clean System Cache\n\
-${ARROW} ${GREEN}[2]${NC} ◇ Check Disk Space"
+    # System Management and VPN Panels (side by side)
+    echo -e "${GREEN}╔════════════════════════════╦════════════════════════════╗${NC}"
+    echo -e "${GREEN}║   ${WHITE}System Management${GREEN}      ║   ${WHITE}VPN Panels${GREEN}            ║${NC}"
+    echo -e "${GREEN}╠════════════════════════════╬════════════════════════════╣${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI     ${GREEN}║${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${GREEN}║${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${GREEN}║${NC}"
+    echo -e "${GREEN}║                            ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${GREEN}║${NC}"
+    echo -e "${GREEN}╚════════════════════════════╩════════════════════════════╝${NC}"
     
-    # VPN Panels
-    draw_box "VPN Panels" $YELLOW 60 "\
-${ARROW} ${YELLOW}[10]${NC} ◇ Install MHSanaei 3X-UI\n\
-${ARROW} ${YELLOW}[11]${NC} ◇ Install Alireza0 3X-UI\n\
-${ARROW} ${YELLOW}[12]${NC} ◇ Install ZI-VPN\n\
-${ARROW} ${YELLOW}[13]${NC} ◇ Uninstall ZI-VPN"
+    # Speed Optimization and SSH Managers (side by side)
+    echo -e "${CYAN}╔════════════════════════════╦════════════════════════════╗${NC}"
+    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers${CYAN}           ║${NC}"
+    echo -e "${CYAN}╠════════════════════════════╬════════════════════════════╣${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost       ║${ARROW} ${BLUE}[30] DARKSSH Manager    ${CYAN}║${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager  ║${ARROW} ${BLUE}[31] 404-SSH Manager    ${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════╩════════════════════════════╝${NC}"
     
-    # Speed Optimization
-    draw_box "Speed Optimization" $CYAN 60 "\
-${ARROW} ${CYAN}[20]${NC} ◇ Install 4-0-4 UDP Boost\n\
-${ARROW} ${CYAN}[21]${NC} ◇ Install UDP Custom Manager"
-    
-    # SSH Managers
-    draw_box "SSH Managers" $BLUE 60 "\
-${ARROW} ${BLUE}[30]${NC} ◇ Install DARKSSH Manager\n\
-${ARROW} ${BLUE}[31]${NC} ◇ Install 404-SSH Manager"
-    
-    # Tools
-    draw_box "Tools" $PURPLE 60 "\
-${ARROW} ${PURPLE}[40]${NC} ◇ Install Selector Tool\n\
-${ARROW} ${PURPLE}[41]${NC} ◇ Server Benchmark"
-    
-    # Other
-    draw_box "Other Options" $RED 60 "\
-${ARROW} ${RED}help${NC} ◇ Show Help Information\n\
-${ARROW} ${RED}exit${NC} ◇ Quit Program"
+    # Tools and Other Options (side by side)
+    echo -e "${PURPLE}╔════════════════════════════╦════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                 ║   ${WHITE}Other Options${PURPLE}        ║${NC}"
+    echo -e "${PURPLE}╠════════════════════════════╬════════════════════════════╣${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool      ║${ARROW} ${RED}help Show Help        ${PURPLE}║${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark  ║${ARROW} ${RED}exit Quit Program     ${PURPLE}║${NC}"
+    echo -e "${PURPLE}╚════════════════════════════╩════════════════════════════╝${NC}"
 }
 
-# Installation Functions
+# Installation Functions (paired)
 install_option() {
     case $1 in
-        0)
-            draw_box "System Update & Upgrade" $GREEN 60 "Performing system update..."
-            apt update && apt upgrade -y
-            draw_box "System Update Complete" $GREEN 60 "System updated successfully!"
-            ;;
-        1)
-            draw_box "Clean System Cache" $GREEN 60 "Cleaning system cache..."
-            apt clean && apt autoclean
-            draw_box "Cache Cleaned" $GREEN 60 "System cache cleaned!"
-            ;;
-        2)
-            draw_box "Disk Space Check" $GREEN 60 "Checking disk space..."
-            df -h
-            ;;
-        10)
-            draw_box "Installing MHSanaei 3X-UI" $YELLOW 60 "This may take a few minutes..."
-            bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
-            ;;
-        11)
-            draw_box "Installing Alireza0 3X-UI" $YELLOW 60 "This may take a few minutes..."
-            bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
-            ;;
-        12)
-            draw_box "Installing ZI-VPN" $YELLOW 60 "This may take a few minutes..."
-            wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
-            chmod +x zi.sh
-            ./zi.sh
-            ;;
-        13)
-            draw_box "Uninstalling ZI-VPN" $YELLOW 60 "Removing ZI-VPN..."
-            wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
-            chmod +x ziun.sh
-            ./ziun.sh
-            ;;
-        20)
-            draw_box "Installing 4-0-4 UDP Script" $CYAN 60 "This may take a few minutes..."
-            git clone https://github.com/nyeinkokoaung404/udp-custom
-            cd udp-custom || exit
-            chmod +x install.sh
-            ./install.sh
-            ;;
-        21)
-            draw_box "Installing UDP Custom Manager" $CYAN 60 "This may take a few minutes..."
-            wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
-            chmod +x install.sh
-            bash install.sh
-            ;;
-        30)
-            draw_box "Installing DARKSSH Manager" $BLUE 60 "This may take a few minutes..."
-            wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark
-            chmod 777 Dark
-            ./Dark
-            ;;
-        31)
-            draw_box "Installing 404-SSH Manager" $BLUE 60 "This may take a few minutes..."
-            wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe
-            chmod 777 hehe
-            ./hehe
-            ;;
-        40)
-            draw_box "Installing Selector Tool" $PURPLE 60 "This may take a few minutes..."
-            bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
-            draw_box "Installation Complete" $PURPLE 60 "You can now run the tool with '404' command."
-            ;;
-        41)
-            draw_box "Running Server Benchmark" $PURPLE 60 "This may take several minutes..."
-            curl -sL yabs.sh | bash
-            ;;
-        *)
-            draw_box "Error" $RED 60 "Invalid option selected!"
-            return 1
-            ;;
+        0) system_update ;;
+        1) clean_cache ;;
+        2) check_disk ;;
+        10) install_mhsanaei ;;
+        11) install_alireza ;;
+        12) install_zivpn ;;
+        13) uninstall_zivpn ;;
+        20) install_404udp ;;
+        21) install_udpmanager ;;
+        30) install_darkssh ;;
+        31) install_404ssh ;;
+        40) install_selector ;;
+        41) run_benchmark ;;
+        *) draw_box "Error" $RED 60 "Invalid option selected!"; return 1 ;;
     esac
     return 0
+}
+
+# Paired installation functions
+system_update() {
+    draw_box "System Update & Upgrade" $GREEN 60 "Performing system update..."
+    apt update && apt upgrade -y
+    draw_box "System Update Complete" $GREEN 60 "System updated successfully!"
+}
+
+clean_cache() {
+    draw_box "Clean System Cache" $GREEN 60 "Cleaning system cache..."
+    apt clean && apt autoclean
+    draw_box "Cache Cleaned" $GREEN 60 "System cache cleaned!"
+}
+
+check_disk() {
+    draw_box "Disk Space Check" $GREEN 60 "Checking disk space..."
+    df -h
+}
+
+install_mhsanaei() {
+    draw_box "Installing MHSanaei 3X-UI" $YELLOW 60 "This may take a few minutes..."
+    bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+}
+
+install_alireza() {
+    draw_box "Installing Alireza0 3X-UI" $YELLOW 60 "This may take a few minutes..."
+    bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+}
+
+install_zivpn() {
+    draw_box "Installing ZI-VPN" $YELLOW 60 "This may take a few minutes..."
+    wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
+    chmod +x zi.sh
+    ./zi.sh
+}
+
+uninstall_zivpn() {
+    draw_box "Uninstalling ZI-VPN" $YELLOW 60 "Removing ZI-VPN..."
+    wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
+    chmod +x ziun.sh
+    ./ziun.sh
+}
+
+install_404udp() {
+    draw_box "Installing 4-0-4 UDP Script" $CYAN 60 "This may take a few minutes..."
+    git clone https://github.com/nyeinkokoaung404/udp-custom
+    cd udp-custom || exit
+    chmod +x install.sh
+    ./install.sh
+}
+
+install_udpmanager() {
+    draw_box "Installing UDP Custom Manager" $CYAN 60 "This may take a few minutes..."
+    wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
+    chmod +x install.sh
+    bash install.sh
+}
+
+install_darkssh() {
+    draw_box "Installing DARKSSH Manager" $BLUE 60 "This may take a few minutes..."
+    wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark
+    chmod 777 Dark
+    ./Dark
+}
+
+install_404ssh() {
+    draw_box "Installing 404-SSH Manager" $BLUE 60 "This may take a few minutes..."
+    wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe
+    chmod 777 hehe
+    ./hehe
+}
+
+install_selector() {
+    draw_box "Installing Selector Tool" $PURPLE 60 "This may take a few minutes..."
+    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
+    draw_box "Installation Complete" $PURPLE 60 "You can now run the tool with '404' command."
+}
+
+run_benchmark() {
+    draw_box "Running Server Benchmark" $PURPLE 60 "This may take several minutes..."
+    curl -sL yabs.sh | bash
 }
 
 # Help Information
