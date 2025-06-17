@@ -131,13 +131,9 @@ ${STAR} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}
 EOF
 )
     draw_box "System Information" $GREEN 60 "$sysinfo"
-}
-
-# Beautiful header with ASCII art
-display_header() {
-    clear
     
-    # Display 404 with figlet
+    # Display 404 with figlet centered below system info
+    echo -e "\n"
     echo -e "${RED}"
     figlet -f slant "4 0 4" | awk -v termwidth="$(tput cols)" '
     {
@@ -145,13 +141,30 @@ display_header() {
         printf "%" spaces "s%s\n", "", $0
     }'
     echo -e "${NC}"
+}
+
+# Beautiful header with box
+display_header() {
+    clear
     
-    # Fixed header display
+    # Create box for title
     termwidth=$(tput cols)
     title="Server Management Toolkit v2.0"
-    padding=$(( (termwidth - ${#title}) / 2 ))
-    printf "%*s${PURPLE}%s${NC}\n" $padding "" "$title"
-    echo -e "${PURPLE}$(printf '%*s' $termwidth | tr ' ' '═')${NC}"
+    box_width=$(( ${#title} + 8 ))
+    
+    echo -ne "${PURPLE}${BOX_CORNER_TL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((box_width-2)))
+    echo -e "${BOX_CORNER_TR}${NC}"
+    
+    echo -ne "${PURPLE}${BOX_VERT}${NC}"
+    printf "%*s" $(( (box_width - ${#title}) / 2 )) ""
+    echo -ne "${WHITE}${title}${NC}"
+    printf "%*s" $(( (box_width - ${#title} + 1) / 2 )) ""
+    echo -e "${PURPLE}${BOX_VERT}${NC}"
+    
+    echo -ne "${PURPLE}${BOX_CORNER_BL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((box_width-2)))
+    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
 ## ---------------------------
