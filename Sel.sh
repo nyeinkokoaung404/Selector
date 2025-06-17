@@ -36,41 +36,89 @@ HEART="${RED}❤${NC}"
 DIAMOND="${BLUE}♦${NC}"
 
 ## ---------------------------
+## Initial Checks
+## ---------------------------
+
+# Root check
+if [ "$(id -u)" -ne 0 ]; then
+    echo -e "${RED}This script must be run as root!${NC}"
+    exit 1
+fi
+
+# Check and install figlet if not exists
+if ! command -v figlet &> /dev/null; then
+    echo -e "${YELLOW}Installing figlet for better display...${NC}"
+    apt-get update && apt-get install -y figlet
+fi
+
+## ---------------------------
 ## Display Functions
 ## ---------------------------
 
-# Function to center text on screen
-center_text() {
-    local text="$1"
-    local color="$2"
+# Function to display centered text with borders
+center() {
     local termwidth=$(tput cols)
-    local padding=$(( (termwidth - ${#text}) / 2 ))
-    printf "%*s${color}%s${NC}\n" $padding "" "$text"
+    local title="$1"
+    local color="$2"
+    local border_char="$3"
+    
+    local border=$(printf "%*s" "$termwidth" | tr ' ' "$border_char")
+    local padding=$(( (termwidth - ${#title} - 2) / 2 ))
+    
+    echo -e "${color}${border}${NC}"
+    printf "%*s %s %*s\n" $padding "" "${color}${title}${NC}" $padding ""
+    echo -e "${color}${border}${NC}"
 }
 
-# Function to center multi-line content
-center_content() {
-    local content="$1"
+# Improved box drawing function with proper content alignment
+draw_box() {
+    local title="$1"
     local color="$2"
-    local termwidth=$(tput cols)
+    local width="$3"
+    local content="$4"
     
+    # Calculate title position
+    local title_len=${#title}
+    local padding_left=$(( (width - title_len - 2) / 2 ))
+    local padding_right=$(( width - title_len - padding_left - 2 ))
+    
+    # Top border
+    echo -ne "${color}${BOX_CORNER_TL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_TR}${NC}"
+    
+    # Title line
+    echo -ne "${color}${BOX_VERT}"
+    printf "%${padding_left}s" ""
+    echo -ne " ${title} "
+    printf "%${padding_right}s" ""
+    echo -e "${BOX_VERT}${NC}"
+    
+    # Separator line
+    echo -ne "${color}${BOX_L}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_R}${NC}"
+    
+    # Content lines
     while IFS= read -r line; do
         # Remove color codes for length calculation
         clean_line=$(echo -e "$line" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
         local line_len=${#clean_line}
-        local padding=$(( (termwidth - line_len) / 2 ))
-        printf "%*s${color}%s${NC}\n" $padding "" "$line"
+        local content_pad=$(( width - line_len - 3 ))
+        
+        echo -ne "${color}${BOX_VERT}${NC} "
+        echo -ne "$line"
+        printf "%${content_pad}s" ""
+        echo -e "${color}${BOX_VERT}${NC}"
     done <<< "$content"
+    
+    # Bottom border
+    echo -ne "${color}${BOX_CORNER_BL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
-# Beautiful header with centered title
-display_header() {
-    clear
-    center_text "Server Management Toolkit v2.0" $PURPLE
-    echo
-}
-
-# System information display centered
+# Fixed system information display
 show_system_info() {
     local sysinfo=$(cat <<EOF
 ${STAR} ${GREEN}Hostname:${NC} $(hostname)
@@ -82,42 +130,26 @@ ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}' | tr -d ' ')
 ${STAR} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
 EOF
 )
-    center_content "$sysinfo" ""
-    
-    # Display centered 404 with figlet
-    echo
-    echo -e "${RED}"
-    figlet -f slant "4 0 4" | awk -v termwidth="$(tput cols)" '
-    {
-        spaces = int((termwidth - 70) / 2)
-        printf "%" spaces "s%s\n", "", $0
-    }'
-    echo -e "${NC}"
-    echo
+    draw_box "System Information" $GREEN 60 "$sysinfo"
 }
 
-# Beautiful header with box
+# Beautiful header with modified text
 display_header() {
     clear
     
-    # Create box for title
+    # Display "Developed by 404" text
+    termwidth=$(tput cols)
+    title="Developed by 404"
+    padding=$(( (termwidth - ${#title}) / 2 ))
+    printf "%*s${RED}%s${NC}\n" $padding "" "$title"
+    echo
+    
+    # Main header
     termwidth=$(tput cols)
     title="Server Management Toolkit v2.0"
-    box_width=$(( ${#title} + 8 ))
-    
-    echo -ne "${PURPLE}${BOX_CORNER_TL}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((box_width-2)))
-    echo -e "${BOX_CORNER_TR}${NC}"
-    
-    echo -ne "${PURPLE}${BOX_VERT}${NC}"
-    printf "%*s" $(( (box_width - ${#title}) / 2 )) ""
-    echo -ne "${WHITE}${title}${NC}"
-    printf "%*s" $(( (box_width - ${#title} + 1) / 2 )) ""
-    echo -e "${PURPLE}${BOX_VERT}${NC}"
-    
-    echo -ne "${PURPLE}${BOX_CORNER_BL}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((box_width-2)))
-    echo -e "${BOX_CORNER_BR}${NC}"
+    padding=$(( (termwidth - ${#title}) / 2 ))
+    printf "%*s${PURPLE}%s${NC}\n" $padding "" "$title"
+    echo -e "${PURPLE}$(printf '%*s' $termwidth | tr ' ' '═')${NC}"
 }
 
 ## ---------------------------
@@ -249,6 +281,25 @@ ${STAR} ${BLUE}Key Features:${NC}\n\
   ${DIAMOND} VPN Xray Panel Installations\n\
   ${DIAMOND} Network Speed Optimization\n\
   ${DIAMOND} SSH Management Utilities"
+}
+
+install_option() {
+    case $1 in
+        0) system_update ;;
+        1) clean_cache ;;
+        2) check_disk ;;
+        10) install_mhsanaei ;;
+        11) install_alireza ;;
+        12) install_zivpn ;;
+        13) uninstall_zivpn ;;
+        20) install_404udp ;;
+        21) install_udpmanager ;;
+        30) install_darkssh ;;
+        31) install_404ssh ;;
+        40) install_selector ;;
+        41) run_benchmark ;;
+        *) draw_box "Invalid Option" $RED 60 "Please select a valid option number!" ;;
+    esac
 }
 
 ## ---------------------------
