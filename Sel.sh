@@ -33,6 +33,22 @@ IP_ADDRESS=$(hostname -I | awk '{print $1}')
 UPTIME=$(uptime -p | sed 's/up //')
 
 ## ---------------------------
+## Initial Checks
+## ---------------------------
+
+# Root check
+if [ "$(id -u)" -ne 0 ]; then
+    echo -e "${RED}This script must be run as root!${NC}"
+    exit 1
+fi
+
+# Check and install figlet if not exists
+if ! command -v figlet &> /dev/null; then
+    echo -e "${YELLOW}Installing figlet for better display...${NC}"
+    apt-get update && apt-get install -y figlet
+fi
+
+## ---------------------------
 ## Functions
 ## ---------------------------
 
@@ -51,33 +67,39 @@ center() {
     echo -e "${color}${border}${NC}"
 }
 
-# Animated progress spinner
-spinner() {
-    local pid=$!
-    local delay=0.1
-    local spinstr='|/-\'
+# Box drawing function
+draw_box() {
+    local title="$1"
+    local color="$2"
+    local width="$3"
+    local content="$4"
     
-    tput civis # Hide cursor
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c] " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b"
-    done
-    tput cnorm # Show cursor
-    printf "    \b\b\b\b"
+    local padding=$(( (width - ${#title} - 2) / 2 ))
+    local title_line=$(printf "%${padding}s %s %${padding}s" "" "$title" "")
+    title_line=${title_line:0:$width}  # Ensure it doesn't exceed width
+    
+    echo -e "${color}┌$(printf '%*s' $((width-2)) | tr ' ' '─')┐${NC}"
+    echo -e "${color}│${title_line}│${NC}"
+    echo -e "${color}├$(printf '%*s' $((width-2)) | tr ' ' '─')┤${NC}"
+    
+    # Handle multi-line content
+    while IFS= read -r line; do
+        printf "${color}│ ${NC}%-$((width-3))s ${color}│${NC}\n" "$line"
+    done <<< "$content"
+    
+    echo -e "${color}└$(printf '%*s' $((width-2)) | tr ' ' '─')┘${NC}"
 }
 
 # Display system information
 show_system_info() {
     echo -e "${DOUBLE_LINE}"
-    echo -e "${STAR} ${GREEN}Hostname:${NC} $(hostname)"
-    echo -e "${STAR} ${GREEN}IP Address:${NC} $IP_ADDRESS"
-    echo -e "${STAR} ${GREEN}Uptime:${NC} $UPTIME"
-    echo -e "${STAR} ${GREEN}OS:${NC} $OS_INFO"
-    echo -e "${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)"
-    echo -e "${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
+    draw_box "System Information" $GREEN 60 "\
+${STAR} ${GREEN}Hostname:${NC} $(hostname)\n\
+${STAR} ${GREEN}IP Address:${NC} $IP_ADDRESS\n\
+${STAR} ${GREEN}Uptime:${NC} $UPTIME\n\
+${STAR} ${GREEN}OS:${NC} $OS_INFO\n\
+${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)\n\
+${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
     echo -e "${DOUBLE_LINE}"
 }
 
@@ -85,33 +107,13 @@ show_system_info() {
 display_header() {
     clear
     
-    # Get terminal width
-    local termwidth=$(tput cols)
-    
-    # Display header with borders
-    echo -e "${BLUE}"
-    echo "╔══════════════════════════════════════════════════════════════════════════════╗" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "║                                                                              ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    
-    # Display the requested ASCII art with proper centering
-    echo -e "${YELLOW}"
-    cat << "EOF" | awk -v termwidth="$termwidth" '
+    # Display 404 with figlet
+    echo -e "${RED}"
+    figlet -f slant "4 0 4" | awk -v termwidth="$(tput cols)" '
     {
         spaces = int((termwidth - 70) / 2)
         printf "%" spaces "s%s\n", "", $0
-    }
-    '
-    |     _________         _________          _________               |
-    |    |\  \ |\  \        |\   __  \        |\  \ |\  \              |
-    |    \ \  \|_\  \       \ \  \|\  \       \ \  \|_\  \             |
-    |     \ \______  \       \ \  \/\  \       \ \______  \            |
-    |      \|_____|\  \       \ \  \/\  \       \|_____|\  \           |
-    |             \ \__\       \ \_______\             \ \__\          |
-    |              \|__|        \|_______|              \|__|          |
-EOF
-    echo -e "${BLUE}"
-    echo "║                                                                              ║" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
-    echo "╚══════════════════════════════════════════════════════════════════════════════╝" | awk -v termwidth="$termwidth" '{printf "%*s\n", (termwidth+82)/2, $0}'
+    }'
     echo -e "${NC}"
     
     center "Server Management Toolkit v2.0" $PURPLE "═"
@@ -124,42 +126,38 @@ show_menu() {
     echo -e "${WHITE}╞══════════════════════════════════════════════════════════════════════════════╡${NC}"
     
     # System Management
-    echo -e "${WHITE}│${NC} ${GREEN}System Management:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}[0]${NC} ◇ System Update & Upgrade"
-    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}[1]${NC} ◇ Clean System Cache"
-    echo -e "${WHITE}│${NC} ${ARROW} ${GREEN}[2]${NC} ◇ Check Disk Space"
-    echo -e "${WHITE}│${NC}"
+    draw_box "System Management" $GREEN 60 "\
+${ARROW} ${GREEN}[0]${NC} ◇ System Update & Upgrade\n\
+${ARROW} ${GREEN}[1]${NC} ◇ Clean System Cache\n\
+${ARROW} ${GREEN}[2]${NC} ◇ Check Disk Space"
     
     # VPN Panels
-    echo -e "${WHITE}│${NC} ${YELLOW}VPN Panels:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[10]${NC} ◇ Install MHSanaei 3X-UI (MHSanaei Xray Panel)"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[11]${NC} ◇ Install Alireza0 3X-UI (Alternative Xray Panel)"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[12]${NC} ◇ Install ZI-VPN"
-    echo -e "${WHITE}│${NC} ${ARROW} ${YELLOW}[13]${NC} ◇ Uninstall ZI-VPN"
-    echo -e "${WHITE}│${NC}"
+    draw_box "VPN Panels" $YELLOW 60 "\
+${ARROW} ${YELLOW}[10]${NC} ◇ Install MHSanaei 3X-UI\n\
+${ARROW} ${YELLOW}[11]${NC} ◇ Install Alireza0 3X-UI\n\
+${ARROW} ${YELLOW}[12]${NC} ◇ Install ZI-VPN\n\
+${ARROW} ${YELLOW}[13]${NC} ◇ Uninstall ZI-VPN"
     
     # Speed Optimization
-    echo -e "${WHITE}│${NC} ${CYAN}Speed Optimization:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${CYAN}[20]${NC} ◇ Install 4-0-4 UDP Speed Boost"
-    echo -e "${WHITE}│${NC} ${ARROW} ${CYAN}[21]${NC} ◇ Install UDP Custom Manager"
-    echo -e "${WHITE}│${NC}"
+    draw_box "Speed Optimization" $CYAN 60 "\
+${ARROW} ${CYAN}[20]${NC} ◇ Install 4-0-4 UDP Boost\n\
+${ARROW} ${CYAN}[21]${NC} ◇ Install UDP Custom Manager"
     
     # SSH Managers
-    echo -e "${WHITE}│${NC} ${BLUE}SSH Managers:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[30]${NC} ◇ Install DARKSSH Manager"
-    echo -e "${WHITE}│${NC} ${ARROW} ${BLUE}[31]${NC} ◇ Install 404-SSH Manager"
-    echo -e "${WHITE}│${NC}"
+    draw_box "SSH Managers" $BLUE 60 "\
+${ARROW} ${BLUE}[30]${NC} ◇ Install DARKSSH Manager\n\
+${ARROW} ${BLUE}[31]${NC} ◇ Install 404-SSH Manager"
     
     # Tools
-    echo -e "${WHITE}│${NC} ${MAGENTA}Tools:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${MAGENTA}[40]${NC} ◇ Install Selector Tool (404)"
-    echo -e "${WHITE}│${NC} ${ARROW} ${MAGENTA}[41]${NC} ◇ Server Benchmark"
-    echo -e "${WHITE}│${NC}"
+    draw_box "Tools" $PURPLE 60 "\
+${ARROW} ${PURPLE}[40]${NC} ◇ Install Selector Tool\n\
+${ARROW} ${PURPLE}[41]${NC} ◇ Server Benchmark"
     
     # Other
-    echo -e "${WHITE}│${NC} ${RED}Other:${NC}"
-    echo -e "${WHITE}│${NC} ${ARROW} ${RED}help${NC} ◇ Show Help Information"
-    echo -e "${WHITE}│${NC} ${ARROW} ${RED}exit${NC} ◇ Quit Program"
+    draw_box "Other Options" $RED 60 "\
+${ARROW} ${RED}help${NC} ◇ Show Help Information\n\
+${ARROW} ${RED}exit${NC} ◇ Quit Program"
+    
     echo -e "${WHITE}╘══════════════════════════════════════════════════════════════════════════════╛${NC}"
 }
 
@@ -167,64 +165,75 @@ show_menu() {
 install_option() {
     case $1 in
         0)
-            echo -e "${CHECK} Performing System Update..."
-            apt update && apt upgrade -y &
-            spinner
-            echo -e "\n${CHECK} ${GREEN}System Updated Successfully!${NC}"
+            draw_box "System Update & Upgrade" $GREEN 60 "Performing system update..."
+            apt update && apt upgrade -y
+            draw_box "System Update Complete" $GREEN 60 "System updated successfully!"
             ;;
         1)
-            echo -e "${CHECK} Cleaning System Cache..."
-            apt clean && apt autoclean &
-            spinner
-            echo -e "\n${CHECK} ${GREEN}System Cache Cleaned!${NC}"
+            draw_box "Clean System Cache" $GREEN 60 "Cleaning system cache..."
+            apt clean && apt autoclean
+            draw_box "Cache Cleaned" $GREEN 60 "System cache cleaned!"
             ;;
         2)
-            echo -e "${CHECK} Checking Disk Space..."
+            draw_box "Disk Space Check" $GREEN 60 "Checking disk space..."
             df -h
             ;;
         10)
-            echo -e "${CHECK} Installing MHSanaei 3X-UI..."
+            draw_box "Installing MHSanaei 3X-UI" $YELLOW 60 "This may take a few minutes..."
             bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
             ;;
         11)
-            echo -e "${CHECK} Installing Alireza0 3X-UI..."
+            draw_box "Installing Alireza0 3X-UI" $YELLOW 60 "This may take a few minutes..."
             bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
             ;;
         12)
-            echo -e "${CHECK} Installing ZI-VPN..."
-            wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh; sudo chmod +x zi.sh; sudo ./zi.sh
+            draw_box "Installing ZI-VPN" $YELLOW 60 "This may take a few minutes..."
+            wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
+            chmod +x zi.sh
+            ./zi.sh
             ;;
         13)
-            echo -e "${CHECK} Uninstalling ZI-VPN..."
-            wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh; sudo chmod +x ziun.sh; sudo ./ziun.sh
+            draw_box "Uninstalling ZI-VPN" $YELLOW 60 "Removing ZI-VPN..."
+            wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
+            chmod +x ziun.sh
+            ./ziun.sh
             ;;
         20)
-            echo -e "${CHECK} Installing 4-0-4 UDP Script..."
-            git clone https://github.com/nyeinkokoaung404/udp-custom && cd udp-custom && chmod +x install.sh && ./install.sh
+            draw_box "Installing 4-0-4 UDP Script" $CYAN 60 "This may take a few minutes..."
+            git clone https://github.com/nyeinkokoaung404/udp-custom
+            cd udp-custom || exit
+            chmod +x install.sh
+            ./install.sh
             ;;
         21)
-            echo -e "${CHECK} Installing UDP Custom Manager..."
-            wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh && chmod +x install.sh && bash install.sh
+            draw_box "Installing UDP Custom Manager" $CYAN 60 "This may take a few minutes..."
+            wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
+            chmod +x install.sh
+            bash install.sh
             ;;
         30)
-            echo -e "${CHECK} Installing DARKSSH Manager..."
-            wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark; chmod 777 Dark; ./Dark
+            draw_box "Installing DARKSSH Manager" $BLUE 60 "This may take a few minutes..."
+            wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark
+            chmod 777 Dark
+            ./Dark
             ;;
         31)
-            echo -e "${CHECK} Installing 404-SSH Manager..."
-            wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe; chmod 777 hehe;./hehe
+            draw_box "Installing 404-SSH Manager" $BLUE 60 "This may take a few minutes..."
+            wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe
+            chmod 777 hehe
+            ./hehe
             ;;
         40)
-            echo -e "${CHECK} Installing Selector Tool..."
+            draw_box "Installing Selector Tool" $PURPLE 60 "This may take a few minutes..."
             bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
-            echo -e "\n${STAR} ${GREEN}Installation complete! You can now run the tool with '404' command.${NC}"
+            draw_box "Installation Complete" $PURPLE 60 "You can now run the tool with '404' command."
             ;;
         41)
-            echo -e "${CHECK} Running Server Benchmark..."
+            draw_box "Running Server Benchmark" $PURPLE 60 "This may take several minutes..."
             curl -sL yabs.sh | bash
             ;;
         *)
-            echo -e "${CROSS} ${RED}Invalid Option!${NC}"
+            draw_box "Error" $RED 60 "Invalid option selected!"
             return 1
             ;;
     esac
@@ -233,16 +242,15 @@ install_option() {
 
 # Help Information
 show_help() {
-    center "HELP INFORMATION" $CYAN "─"
-    echo -e "${ARROW} ${GREEN}This tool provides quick installation of various server management utilities.${NC}"
-    echo -e "${ARROW} ${YELLOW}Each option will download and install the selected software automatically.${NC}"
-    echo -e "${ARROW} ${RED}Ensure you have proper permissions before running installations.${NC}"
-    echo -e "\n${STAR} ${BLUE}Key Features:${NC}"
-    echo -e "  ${DIAMOND} System Maintenance Tools"
-    echo -e "  ${DIAMOND} VPN Xray Panel Installations"
-    echo -e "  ${DIAMOND} Network Speed Optimization"
-    echo -e "  ${DIAMOND} SSH Management Utilities"
-    echo -e "${DOUBLE_LINE}"
+    draw_box "HELP INFORMATION" $CYAN 60 "\
+${ARROW} ${GREEN}This tool provides quick installation of server utilities.${NC}\n\
+${ARROW} ${YELLOW}Each option will download and install software automatically.${NC}\n\
+${ARROW} ${RED}Ensure you have proper permissions before installations.${NC}\n\n\
+${STAR} ${BLUE}Key Features:${NC}\n\
+  ${DIAMOND} System Maintenance Tools\n\
+  ${DIAMOND} VPN Xray Panel Installations\n\
+  ${DIAMOND} Network Speed Optimization\n\
+  ${DIAMOND} SSH Management Utilities"
 }
 
 ## ---------------------------
@@ -260,21 +268,22 @@ while true; do
     case $user_input in
         help)
             show_help
-            continue
+            echo -e "${STAR} ${YELLOW}Press any key to continue...${NC}"
+            read -n 1 -s -r
             ;;
         exit)
-            echo -e "${CHECK} ${GREEN}Thank you for using the Server Management Toolkit! Goodbye.${NC}\n"
+            draw_box "Goodbye" $GREEN 60 "Thank you for using the Server Management Toolkit!"
+            echo -e "\n"
             exit 0
             ;;
         *)
             if [[ "$user_input" =~ ^[0-9]+$ ]]; then
                 install_option "$user_input"
                 echo -e "${LINE}"
-                echo -e "${CHECK} ${GREEN}Operation Completed Successfully!${NC}"
                 echo -e "${STAR} ${YELLOW}Press any key to return to the menu...${NC}"
                 read -n 1 -s -r
             else
-                echo -e "${CROSS} ${RED}Invalid input! Please enter a valid option.${NC}\n"
+                draw_box "Invalid Input" $RED 60 "Please enter a valid option!"
                 echo -e "${STAR} ${YELLOW}Press any key to continue...${NC}"
                 read -n 1 -s -r
             fi
