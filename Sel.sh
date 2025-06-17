@@ -168,7 +168,7 @@ show_menu() {
     echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI     ${NC}"
     echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${NC}"
     echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${NC}"
-    echo -e "${GREEN}║                             ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${NC}"
+    echo -e "${GREEN}║                           ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${NC}"
     echo -e "${GREEN}╚═════════════════════════════════════════════════════════╝${NC}\n"
     
     # Speed Optimization and SSH Managers (side by side)
@@ -181,10 +181,10 @@ show_menu() {
     
     # Tools and Other Options (side by side)
     echo -e "${PURPLE}╔═════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                  ║   ${WHITE}Other Options            ${NC}"
+    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                   ║   ${WHITE}Other Options            ${NC}"
     echo -e "${PURPLE}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool      ║${ARROW} ${RED}help Show Help       ${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark   ║${ARROW} ${RED}exit Quit Program    ${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool       ║${ARROW} ${RED}help Show Help       ${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark    ║${ARROW} ${RED}exit Quit Program    ${NC}"
     echo -e "${PURPLE}╚═════════════════════════════════════════════════════════╝${NC}"
 }
 
