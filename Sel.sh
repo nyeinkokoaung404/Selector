@@ -36,89 +36,41 @@ HEART="${RED}❤${NC}"
 DIAMOND="${BLUE}♦${NC}"
 
 ## ---------------------------
-## Initial Checks
-## ---------------------------
-
-# Root check
-if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}This script must be run as root!${NC}"
-    exit 1
-fi
-
-# Check and install figlet if not exists
-if ! command -v figlet &> /dev/null; then
-    echo -e "${YELLOW}Installing figlet for better display...${NC}"
-    apt-get update && apt-get install -y figlet
-fi
-
-## ---------------------------
 ## Display Functions
 ## ---------------------------
 
-# Function to display centered text with borders
-center() {
-    local termwidth=$(tput cols)
-    local title="$1"
+# Function to center text on screen
+center_text() {
+    local text="$1"
     local color="$2"
-    local border_char="$3"
-    
-    local border=$(printf "%*s" "$termwidth" | tr ' ' "$border_char")
-    local padding=$(( (termwidth - ${#title} - 2) / 2 ))
-    
-    echo -e "${color}${border}${NC}"
-    printf "%*s %s %*s\n" $padding "" "${color}${title}${NC}" $padding ""
-    echo -e "${color}${border}${NC}"
+    local termwidth=$(tput cols)
+    local padding=$(( (termwidth - ${#text}) / 2 ))
+    printf "%*s${color}%s${NC}\n" $padding "" "$text"
 }
 
-# Improved box drawing function with proper content alignment
-draw_box() {
-    local title="$1"
+# Function to center multi-line content
+center_content() {
+    local content="$1"
     local color="$2"
-    local width="$3"
-    local content="$4"
+    local termwidth=$(tput cols)
     
-    # Calculate title position
-    local title_len=${#title}
-    local padding_left=$(( (width - title_len - 2) / 2 ))
-    local padding_right=$(( width - title_len - padding_left - 2 ))
-    
-    # Top border
-    echo -ne "${color}${BOX_CORNER_TL}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
-    echo -e "${BOX_CORNER_TR}${NC}"
-    
-    # Title line
-    echo -ne "${color}${BOX_VERT}"
-    printf "%${padding_left}s" ""
-    echo -ne " ${title} "
-    printf "%${padding_right}s" ""
-    echo -e "${BOX_VERT}${NC}"
-    
-    # Separator line
-    echo -ne "${color}${BOX_L}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
-    echo -e "${BOX_R}${NC}"
-    
-    # Content lines
     while IFS= read -r line; do
         # Remove color codes for length calculation
         clean_line=$(echo -e "$line" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
         local line_len=${#clean_line}
-        local content_pad=$(( width - line_len - 3 ))
-        
-        echo -ne "${color}${BOX_VERT}${NC} "
-        echo -ne "$line"
-        printf "%${content_pad}s" ""
-        echo -e "${color}${BOX_VERT}${NC}"
+        local padding=$(( (termwidth - line_len) / 2 ))
+        printf "%*s${color}%s${NC}\n" $padding "" "$line"
     done <<< "$content"
-    
-    # Bottom border
-    echo -ne "${color}${BOX_CORNER_BL}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
-    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
-# Fixed system information display
+# Beautiful header with centered title
+display_header() {
+    clear
+    center_text "Server Management Toolkit v2.0" $PURPLE
+    echo
+}
+
+# System information display centered
 show_system_info() {
     local sysinfo=$(cat <<EOF
 ${STAR} ${GREEN}Hostname:${NC} $(hostname)
@@ -130,10 +82,10 @@ ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}' | tr -d ' ')
 ${STAR} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
 EOF
 )
-    draw_box "System Information" $GREEN 60 "$sysinfo"
+    center_content "$sysinfo" ""
     
-    # Display 404 with figlet centered below system info
-    echo -e "\n"
+    # Display centered 404 with figlet
+    echo
     echo -e "${RED}"
     figlet -f slant "4 0 4" | awk -v termwidth="$(tput cols)" '
     {
@@ -141,6 +93,7 @@ EOF
         printf "%" spaces "s%s\n", "", $0
     }'
     echo -e "${NC}"
+    echo
 }
 
 # Beautiful header with box
