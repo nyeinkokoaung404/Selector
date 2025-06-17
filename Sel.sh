@@ -12,10 +12,20 @@ BLUE='\033[1;34m'
 PURPLE='\033[1;35m'
 CYAN='\033[1;36m'
 WHITE='\033[1;37m'
-BG_BLUE='\e[44m'
-BG_GREEN='\e[42m'
-BG_RED='\e[41m'
 NC='\033[0m'
+
+# Box Drawing Characters
+BOX_HORIZ="═"
+BOX_VERT="║"
+BOX_CORNER_TL="╔"
+BOX_CORNER_TR="╗"
+BOX_CORNER_BL="╚"
+BOX_CORNER_BR="╝"
+BOX_T="╦"
+BOX_B="╩"
+BOX_L="╠"
+BOX_R="╣"
+BOX_CROSS="╬"
 
 # UI Elements
 CHECK="${GREEN}✔${NC}"
@@ -24,13 +34,6 @@ ARROW="${CYAN}➜${NC}"
 STAR="${YELLOW}✰${NC}"
 HEART="${RED}❤${NC}"
 DIAMOND="${BLUE}♦${NC}"
-LINE="${BLUE}$(printf '%*s' $(tput cols) | tr ' ' '─')${NC}"
-DOUBLE_LINE="${PURPLE}$(printf '%*s' $(tput cols) | tr ' ' '═')${NC}"
-
-# System Info
-OS_INFO=$(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
-IP_ADDRESS=$(hostname -I | awk '{print $1}')
-UPTIME=$(uptime -p | sed 's/up //')
 
 ## ---------------------------
 ## Initial Checks
@@ -74,33 +77,55 @@ draw_box() {
     local width="$3"
     local content="$4"
     
-    local padding=$(( (width - ${#title} - 2) / 2 ))
-    local title_line=$(printf "%${padding}s %s %${padding}s" "" "$title" "")
-    title_line=${title_line:0:$width}  # Ensure it doesn't exceed width
+    # Calculate title position
+    local title_len=${#title}
+    local padding_left=$(( (width - title_len - 2) / 2 ))
+    local padding_right=$(( width - title_len - padding_left - 2 ))
     
-    echo -e "${color}┌$(printf '%*s' $((width-2)) | tr ' ' '─')┐${NC}"
-    echo -e "${color}│${title_line}│${NC}"
-    echo -e "${color}├$(printf '%*s' $((width-2)) | tr ' ' '─')┤${NC}"
+    # Top border
+    echo -ne "${color}${BOX_CORNER_TL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_TR}${NC}"
     
-    # Handle multi-line content
+    # Title line
+    echo -ne "${color}${BOX_VERT}"
+    printf "%${padding_left}s" ""
+    echo -ne " ${title} "
+    printf "%${padding_right}s" ""
+    echo -e "${BOX_VERT}${NC}"
+    
+    # Separator line
+    echo -ne "${color}${BOX_L}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_R}${NC}"
+    
+    # Content lines
     while IFS= read -r line; do
-        printf "${color}│ ${NC}%-$((width-3))s ${color}│${NC}\n" "$line"
+        line=${line//\\033\[[0-9;]*[mK]//}  # Remove color codes for length calculation
+        local line_len=${#line}
+        local content_pad=$(( width - line_len - 3 ))
+        
+        echo -ne "${color}${BOX_VERT}${NC} "
+        echo -ne "$(echo "$line" | sed "s/\\\\033\[[0-9;]*m//g")"  # Temporary color removal for alignment
+        printf "%${content_pad}s" ""
+        echo -e "${color}${BOX_VERT}${NC}"
     done <<< "$content"
     
-    echo -e "${color}└$(printf '%*s' $((width-2)) | tr ' ' '─')┘${NC}"
+    # Bottom border
+    echo -ne "${color}${BOX_CORNER_BL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
 # Display system information
 show_system_info() {
-    echo -e "${DOUBLE_LINE}"
     draw_box "System Information" $GREEN 60 "\
 ${STAR} ${GREEN}Hostname:${NC} $(hostname)\n\
-${STAR} ${GREEN}IP Address:${NC} $IP_ADDRESS\n\
-${STAR} ${GREEN}Uptime:${NC} $UPTIME\n\
-${STAR} ${GREEN}OS:${NC} $OS_INFO\n\
+${STAR} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')\n\
+${STAR} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')\n\
+${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)\n\
 ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)\n\
 ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
-    echo -e "${DOUBLE_LINE}"
 }
 
 # Beautiful header with ASCII art
@@ -121,9 +146,7 @@ display_header() {
 
 # Beautiful menu with categories
 show_menu() {
-    echo -e "\n${WHITE}╒══════════════════════════════════════════════════════════════════════════════╕${NC}"
-    echo -e "${WHITE}│${NC} ${PURPLE}MAIN MENU - Please select an option:${NC} ${WHITE}│${NC}"
-    echo -e "${WHITE}╞══════════════════════════════════════════════════════════════════════════════╡${NC}"
+    echo -e "\n"
     
     # System Management
     draw_box "System Management" $GREEN 60 "\
@@ -157,8 +180,6 @@ ${ARROW} ${PURPLE}[41]${NC} ◇ Server Benchmark"
     draw_box "Other Options" $RED 60 "\
 ${ARROW} ${RED}help${NC} ◇ Show Help Information\n\
 ${ARROW} ${RED}exit${NC} ◇ Quit Program"
-    
-    echo -e "${WHITE}╘══════════════════════════════════════════════════════════════════════════════╛${NC}"
 }
 
 # Installation Functions
@@ -279,7 +300,6 @@ while true; do
         *)
             if [[ "$user_input" =~ ^[0-9]+$ ]]; then
                 install_option "$user_input"
-                echo -e "${LINE}"
                 echo -e "${STAR} ${YELLOW}Press any key to return to the menu...${NC}"
                 read -n 1 -s -r
             else
