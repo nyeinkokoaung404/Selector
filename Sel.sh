@@ -165,26 +165,26 @@ show_menu() {
     echo -e "${GREEN}╔════════════════════════════╦════════════════════════════╗${NC}"
     echo -e "${GREEN}║   ${WHITE}System Management${GREEN}      ║   ${WHITE}VPN Panels${GREEN}            ║${NC}"
     echo -e "${GREEN}╠════════════════════════════╬════════════════════════════╣${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI     ${GREEN}║${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${GREEN}║${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${GREEN}║${NC}"
-    echo -e "${GREEN}║                            ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${GREEN}║${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI     ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${NC}"
+    echo -e "${GREEN}║                                          ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${NC}"
     echo -e "${GREEN}╚════════════════════════════╩════════════════════════════╝${NC}\n"
     
     # Speed Optimization and SSH Managers (side by side)
     echo -e "${CYAN}╔════════════════════════════╦════════════════════════════╗${NC}"
-    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers${CYAN}           ║${NC}"
+    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers                 ${NC}"
     echo -e "${CYAN}╠════════════════════════════╬════════════════════════════╣${NC}"
-    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost       ║${ARROW} ${BLUE}[30] DARKSSH Manager    ${CYAN}║${NC}"
-    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager  ║${ARROW} ${BLUE}[31] 404-SSH Manager    ${CYAN}║${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost        ║${ARROW} ${BLUE}[30] DARKSSH Manager    ${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager   ║${ARROW} ${BLUE}[31] 404-SSH Manager    ${NC}"
     echo -e "${CYAN}╚════════════════════════════╩════════════════════════════╝${NC}\n"
     
     # Tools and Other Options (side by side)
     echo -e "${PURPLE}╔════════════════════════════╦════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                 ║   ${WHITE}Other Options${PURPLE}        ║${NC}"
+    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                ║   ${WHITE}Other Options            ${NC}"
     echo -e "${PURPLE}╠════════════════════════════╬════════════════════════════╣${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool      ║${ARROW} ${RED}help Show Help        ${PURPLE}║${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark  ║${ARROW} ${RED}exit Quit Program     ${PURPLE}║${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool     ║${ARROW} ${RED}help Show Help       ${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark  ║${ARROW} ${RED}exit Quit Program    ${NC}"
     echo -e "${PURPLE}╚════════════════════════════╩════════════════════════════╝${NC}"
 }
 
