@@ -147,9 +147,11 @@ display_header() {
     # Main header
     termwidth=$(tput cols)
     title="Server Management Toolkit v2.0"
+    dev="Contact to developer => t.me/nkka404"
     padding=$(( (termwidth - ${#title}) / 2 ))
     printf "%*s${PURPLE}%s${NC}\n" $padding "" "$title"
-    echo -e "${PURPLE}$(printf '%*s' $termwidth | tr ' ' '═')${NC}"
+    printf "%*s${GREEN}%s${NC}\n" $padding "" "$dev"
+    ## echo -e "${PURPLE}$(printf '%*s' $termwidth | tr ' ' '═')${NC}"
 }
 
 ## ---------------------------
