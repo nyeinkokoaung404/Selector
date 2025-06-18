@@ -2,30 +2,41 @@
 clear
 
 ## ---------------------------
-## အခြေခံအရောင်များ
+## Global Configuration
 ## ---------------------------
-RED='\033[1;31m'      # အနီရောင်
-GREEN='\033[1;32m'    # အစိမ်းရောင်
-YELLOW='\033[1;33m'   # အဝါရောင်
-BLUE='\033[1;34m'     # အပြာရောင်
-PURPLE='\033[1;35m'   # ခရမ်းရောင်
-CYAN='\033[1;36m'     # စိမ်းပြာရောင်
-WHITE='\033[1;37m'    # အဖြူရောင်
-NC='\033[0m'          # ရောင်ချွတ်ရန်
+# Color Definitions
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+PURPLE='\033[1;35m'
+CYAN='\033[1;36m'
+WHITE='\033[1;37m'
+NC='\033[0m'
 
-## ---------------------------
-## အချက်အလက်များ
-## ---------------------------
+# Script Metadata
 VERSION="2.2"
-DEVELOPER="404"
+AUTHOR="404"
 CONTACT="t.me/nkka404"
-UPDATE_URL="https://raw.githubusercontent.com/yourrepo/yourscript/main/script.sh"
+REPO_URL="https://github.com/yourrepo/yourscript"
 
 ## ---------------------------
-## ဖန်ရှင်များ
+## UI Functions
 ## ---------------------------
 
-# စာသားကိုအလယ်တည့်စေရန်
+display_header() {
+    clear
+    echo -e "${PURPLE}"
+    echo "╔════════════════════════════════════════╗"
+    echo "║      SERVER MANAGEMENT TOOLKIT         ║"
+    echo "║               v$VERSION                ║"
+    echo "╚════════════════════════════════════════╝"
+    echo -e "${NC}"
+    echo -e "${CYAN}Developed by: $AUTHOR"
+    echo -e "Contact: $CONTACT${NC}"
+    echo
+}
+
 center_text() {
     local text="$1"
     local color="$2"
@@ -37,155 +48,177 @@ center_text() {
     echo -e "${color}${text}${NC}"
 }
 
-# စနစ်အချက်အလက်များပြသရန်
+draw_box() {
+    local title="$1"
+    local color="$2"
+    
+    echo -e "${color}"
+    center_text "╔════════════════════════════════════════╗"
+    center_text "║           $title            ║"
+    center_text "╠════════════════════════════════════════╣"
+    echo -e "${NC}"
+}
+
 show_system_info() {
-    echo
-    center_text "╔════════════════════════════════╗" $GREEN
-    center_text "║     စနစ်အချက်အလက်များ      ║" $GREEN
-    center_text "╠════════════════════════════════╣" $GREEN
+    draw_box "SYSTEM INFORMATION" $GREEN
     
-    center_text "║ ကွန်ပျူတာအမည်: $(hostname)" $GREEN
-    center_text "║ IP လိပ်စာ: $(hostname -I | awk '{print $1}')" $GREEN
-    center_text "║ အလုပ်လုပ်ချိန်: $(uptime -p)" $GREEN
-    center_text "║ OS: $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" $GREEN
-    center_text "║ CPU: $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" $GREEN
-    center_text "║ မှတ်ဉာဏ်: $(free -h | awk '/Mem/{print $3"/"$2}')" $GREEN
-    center_text "║ နေရာလွတ်: $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" $GREEN
+    echo -e "${GREEN}║ ${WHITE}• Hostname:${NC} $(hostname)"
+    echo -e "${GREEN}║ ${WHITE}• IP Address:${NC} $(hostname -I | awk '{print $1}')"
+    echo -e "${GREEN}║ ${WHITE}• Uptime:${NC} $(uptime -p)"
+    echo -e "${GREEN}║ ${WHITE}• OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)"
+    echo -e "${GREEN}║ ${WHITE}• CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)"
+    echo -e "${GREEN}║ ${WHITE}• Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
+    echo -e "${GREEN}║ ${WHITE}• Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')"
     
-    center_text "╚════════════════════════════════╝" $GREEN
+    center_text "╚════════════════════════════════════════╝" $GREEN
     echo
 }
 
-# အဓိကမီနူး
-show_menu() {
-    clear
-    center_text "╔════════════════════════════════╗" $PURPLE
-    center_text "║    Server Management Toolkit   ║" $PURPLE
-    center_text "║       Version $VERSION        ║" $PURPLE
-    center_text "╚════════════════════════════════╝" $PURPLE
+## ---------------------------
+## Core Functions
+## ---------------------------
+
+system_update() {
+    draw_box "SYSTEM UPDATE" $YELLOW
+    echo -e "${YELLOW}Updating package lists...${NC}"
+    apt update
+    echo -e "${YELLOW}Upgrading installed packages...${NC}"
+    apt upgrade -y
+    echo -e "${GREEN}System update completed successfully!${NC}"
+}
+
+clean_system() {
+    draw_box "SYSTEM CLEANUP" $YELLOW
+    echo -e "${YELLOW}Cleaning package cache...${NC}"
+    apt clean
+    echo -e "${YELLOW}Removing unnecessary packages...${NC}"
+    apt autoremove -y
+    echo -e "${GREEN}System cleanup completed!${NC}"
+}
+
+check_resources() {
+    draw_box "SYSTEM RESOURCES" $BLUE
+    echo -e "${BLUE}Memory Usage:${NC}"
+    free -h
+    echo
+    echo -e "${BLUE}Disk Usage:${NC}"
+    df -h
+}
+
+install_package() {
+    local package_name="$1"
+    local install_cmd="$2"
     
+    draw_box "INSTALLING $package_name" $PURPLE
+    echo -e "${PURPLE}Downloading and installing $package_name...${NC}"
+    
+    if eval "$install_cmd"; then
+        echo -e "${GREEN}$package_name installed successfully!${NC}"
+    else
+        echo -e "${RED}Failed to install $package_name!${NC}"
+    fi
+}
+
+## ---------------------------
+## Main Menu
+## ---------------------------
+
+show_main_menu() {
+    display_header
     show_system_info
     
-    center_text "╔════════════════════════════════╗" $BLUE
-    center_text "║        ရွေးချယ်ရန်          ║" $BLUE
-    center_text "╠════════════════════════════════╣" $BLUE
+    draw_box "MAIN MENU" $BLUE
     
-    center_text "║ 0. စနစ်အသစ်များရယူရန်      ║" $CYAN
-    center_text "║ 1. Cache များရှင်းရန်        ║" $CYAN
-    center_text "║ 2. နေရာလွတ်စစ်ဆေးရန်        ║" $CYAN
-    center_text "║ 3. Script အသစ်ရယူရန်        ║" $CYAN
+    echo -e "${BLUE}║ ${CYAN}1. System Update                 ${BLUE}║"
+    echo -e "${BLUE}║ ${CYAN}2. System Cleanup                ${BLUE}║"
+    echo -e "${BLUE}║ ${CYAN}3. Check Resources               ${BLUE}║"
+    echo -e "${BLUE}║ ${YELLOW}4. Install VPN Panel             ${BLUE}║"
+    echo -e "${BLUE}║ ${YELLOW}5. Install Speed Tools           ${BLUE}║"
+    echo -e "${BLUE}║ ${PURPLE}6. Install Management Tools      ${BLUE}║"
+    echo -e "${BLUE}║ ${RED}7. Help & Information           ${BLUE}║"
+    echo -e "${BLUE}║ ${RED}8. Exit                          ${BLUE}║"
     
-    center_text "╠════════════════════════════════╣" $BLUE
-    center_text "║ 10. MHSanaei 3X-UI တပ်ဆင်ရန် ║" $YELLOW
-    center_text "║ 11. Alireza0 3X-UI တပ်ဆင်ရန် ║" $YELLOW
-    center_text "║ 12. ZI-VPN တပ်ဆင်ရန်         ║" $YELLOW
-    center_text "║ 13. ZI-VPN ဖျက်ရန်           ║" $YELLOW
-    
-    center_text "╠════════════════════════════════╣" $BLUE
-    center_text "║ 20. 404 UDP Boost တပ်ဆင်ရန်  ║" $PURPLE
-    center_text "║ 21. UDP Manager တပ်ဆင်ရန်    ║" $PURPLE
-    center_text "║ 30. DARKSSH တပ်ဆင်ရန်        ║" $PURPLE
-    center_text "║ 31. 404-SSH တပ်ဆင်ရန်        ║" $PURPLE
-    
-    center_text "╠════════════════════════════════╣" $BLUE
-    center_text "║ 40. Selector Tool တပ်ဆင်ရန်   ║" $GREEN
-    center_text "║ 41. Benchmark စစ်ဆေးရန်       ║" $GREEN
-    center_text "║ 50. RDP တပ်ဆင်ရန်            ║" $GREEN
-    
-    center_text "╠════════════════════════════════╣" $BLUE
-    center_text "║ help - အကူအညီကြည့်ရန်        ║" $RED
-    center_text "║ exit - ထွက်ရန်                ║" $RED
-    center_text "╚════════════════════════════════╝" $BLUE
+    center_text "╚════════════════════════════════════════╝" $BLUE
     echo
 }
 
 ## ---------------------------
-## အခြေခံစစ်ဆေးမှုများ
+## Initial Checks
 ## ---------------------------
 
-# Root ဟုတ်မဟုတ်စစ်ဆေးခြင်း
+# Verify root privileges
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}ဤ Script ကို root အဖြစ်သာအသုံးပြုနိုင်ပါသည်!${NC}"
+    echo -e "${RED}ERROR: This script must be run as root!${NC}"
     exit 1
 fi
 
-# လိုအပ်သော package များစစ်ဆေးခြင်း
+# Check dependencies
 check_dependencies() {
-    if ! command -v figlet &> /dev/null; then
-        echo -e "${YELLOW}figlet တပ်ဆင်နေသည်...${NC}"
-        apt-get update && apt-get install -y figlet
-    fi
+    local dependencies=("figlet" "curl" "wget")
+    local missing=()
     
-    if ! command -v screen &> /dev/null; then
-        echo -e "${YELLOW}screen တပ်ဆင်နေသည်...${NC}"
-        apt-get install -y screen
+    for dep in "${dependencies[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            missing+=("$dep")
+        fi
+    done
+    
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo -e "${YELLOW}Installing missing dependencies...${NC}"
+        apt update && apt install -y "${missing[@]}"
     fi
 }
 check_dependencies
 
 ## ---------------------------
-## အဓိကလုပ်ဆောင်ချက်များ
-## ---------------------------
-
-system_update() {
-    echo -e "${YELLOW}စနစ်အသစ်များရယူနေသည်...${NC}"
-    apt update && apt upgrade -y
-    echo -e "${GREEN}အသစ်များရယူပြီးပါပြီ!${NC}"
-}
-
-clean_cache() {
-    echo -e "${YELLOW}Cache များရှင်းနေသည်...${NC}"
-    apt clean && apt autoclean
-    echo -e "${GREEN}Cache ရှင်းပြီးပါပြီ!${NC}"
-}
-
-update_script() {
-    echo -e "${YELLOW}Script အသစ်ရှာနေသည်...${NC}"
-    if wget -q --spider $UPDATE_URL; then
-        wget -O $0 $UPDATE_URL
-        echo -e "${GREEN}Script အသစ်ရပြီး ပြန်လည်စတင်နေပါပြီ...${NC}"
-        exec $0
-    else
-        echo -e "${RED}Update လုပ်ရန် မအောင်မြင်ပါ!${NC}"
-    fi
-}
-
-# အခြား function များကို သင့်လိုအပ်ချက်နှင့်အညီ ထည့်သွင်းနိုင်ပါသည်...
-
-## ---------------------------
-## အဓိက Program
+## Execution Loop
 ## ---------------------------
 
 while true; do
-    show_menu
+    show_main_menu
     
-    echo -en "${CYAN}ရွေးချယ်မှုကိုရိုက်ထည့်ပါ: ${NC}"
+    echo -ne "${CYAN}Enter your choice (1-8): ${NC}"
     read -r choice
     
     case $choice in
-        0) system_update ;;
-        1) clean_cache ;;
-        2) check_disk ;;
-        3) update_script ;;
-        help)
-            clear
-            center_text "╔════════════════════════════════╗" $GREEN
-            center_text "║          အကူအညီ          ║" $GREEN
-            center_text "╠════════════════════════════════╣" $GREEN
-            center_text "║ နံပါတ်ရိုက်ပြီးရွေးချယ်ပါ ║" $GREEN
-            center_text "║ help - အကူအညီကြည့်ရန်    ║" $GREEN
-            center_text "║ exit - ထွက်ရန်          ║" $GREEN
-            center_text "╚════════════════════════════════╝" $GREEN
+        1) system_update ;;
+        2) clean_system ;;
+        3) check_resources ;;
+        4) 
+            draw_box "VPN PANELS" $YELLOW
+            echo -e "${YELLOW}1. MHSanaei 3X-UI"
+            echo -e "2. Alireza0 3X-UI"
+            echo -e "3. ZI-VPN${NC}"
+            read -p "Select VPN panel: " vpn_choice
             ;;
-        exit)
-            echo -e "${GREEN}ကျေးဇူးတင်ပါသည်!${NC}"
+        5) 
+            draw_box "SPEED TOOLS" $PURPLE
+            echo -e "${PURPLE}1. 404 UDP Boost"
+            echo -e "2. UDP Custom Manager${NC}"
+            read -p "Select speed tool: " speed_choice
+            ;;
+        6) 
+            draw_box "MANAGEMENT TOOLS" $CYAN
+            echo -e "${CYAN}1. DARKSSH Manager"
+            echo -e "2. 404-SSH Manager"
+            echo -e "3. Selector Tool${NC}"
+            read -p "Select management tool: " mgmt_choice
+            ;;
+        7)
+            draw_box "HELP & INFORMATION" $WHITE
+            echo -e "${WHITE}This toolkit provides server management utilities."
+            echo -e "Select options from the menu to perform actions."
+            echo -e "Report issues to: $CONTACT${NC}"
+            ;;
+        8)
+            echo -e "${GREEN}Thank you for using the Server Management Toolkit!${NC}"
             exit 0
             ;;
         *)
-            echo -e "${RED}မှားယွင်းသောရွေးချယ်မှု!${NC}"
+            echo -e "${RED}Invalid selection! Please choose 1-8.${NC}"
             ;;
     esac
     
-    echo -e "${YELLOW}ဆက်လုပ်ရန် မည်သည့်ခလုတ်ကိုမဆိုနှိပ်ပါ...${NC}"
-    read -n 1 -s -r
+    echo
+    read -n 1 -s -r -p "Press any key to continue..."
 done
