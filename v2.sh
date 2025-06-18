@@ -14,211 +14,126 @@ CYAN='\033[1;36m'
 WHITE='\033[1;37m'
 NC='\033[0m'
 
-# Script Metadata
-VERSION="2.2"
-AUTHOR="404"
-CONTACT="t.me/nkka404"
-REPO_URL="https://github.com/yourrepo/yourscript"
+# Box Drawing Characters
+BOX_HORIZ="═"
+BOX_VERT="║"
+BOX_CORNER_TL="╔"
+BOX_CORNER_TR="╗"
+BOX_CORNER_BL="╚"
+BOX_CORNER_BR="╝"
 
 ## ---------------------------
-## UI Functions
+## Centering Functions
 ## ---------------------------
 
-display_header() {
-    clear
-    echo -e "${PURPLE}"
-    echo "╔════════════════════════════════════════╗"
-    echo "║      SERVER MANAGEMENT TOOLKIT         ║"
-    echo "║               v$VERSION                ║"
-    echo "╚════════════════════════════════════════╝"
-    echo -e "${NC}"
-    echo -e "${CYAN}Developed by: $AUTHOR"
-    echo -e "Contact: $CONTACT${NC}"
-    echo
+calculate_padding() {
+    local text="$1"
+    # Remove color codes for accurate length calculation
+    local clean_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    local text_length=${#clean_text}
+    local term_width=$(tput cols)
+    echo $(( (term_width - text_length) / 2 ))
 }
 
-center_text() {
+print_centered() {
     local text="$1"
     local color="$2"
-    local text_length=$(echo -n "$text" | wc -m)
-    local term_width=$(tput cols)
-    local padding=$(( (term_width - text_length) / 2 ))
+    local padding=$(calculate_padding "$text")
     
     printf "%${padding}s" ""
     echo -e "${color}${text}${NC}"
 }
 
-draw_box() {
-    local title="$1"
-    local color="$2"
-    
-    echo -e "${color}"
-    center_text "╔════════════════════════════════════════╗"
-    center_text "║           $title            ║"
-    center_text "╠════════════════════════════════════════╣"
-    echo -e "${NC}"
+draw_box_top() {
+    local color="$1"
+    local width="$2"
+    echo -ne "${color}${BOX_CORNER_TL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_TR}${NC}"
 }
 
-show_system_info() {
-    draw_box "SYSTEM INFORMATION" $GREEN
-    
-    echo -e "${GREEN}║ ${WHITE}• Hostname:${NC} $(hostname)"
-    echo -e "${GREEN}║ ${WHITE}• IP Address:${NC} $(hostname -I | awk '{print $1}')"
-    echo -e "${GREEN}║ ${WHITE}• Uptime:${NC} $(uptime -p)"
-    echo -e "${GREEN}║ ${WHITE}• OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)"
-    echo -e "${GREEN}║ ${WHITE}• CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)"
-    echo -e "${GREEN}║ ${WHITE}• Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')"
-    echo -e "${GREEN}║ ${WHITE}• Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')"
-    
-    center_text "╚════════════════════════════════════════╝" $GREEN
-    echo
+draw_box_bottom() {
+    local color="$1"
+    local width="$2"
+    echo -ne "${color}${BOX_CORNER_BL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
-## ---------------------------
-## Core Functions
-## ---------------------------
-
-system_update() {
-    draw_box "SYSTEM UPDATE" $YELLOW
-    echo -e "${YELLOW}Updating package lists...${NC}"
-    apt update
-    echo -e "${YELLOW}Upgrading installed packages...${NC}"
-    apt upgrade -y
-    echo -e "${GREEN}System update completed successfully!${NC}"
-}
-
-clean_system() {
-    draw_box "SYSTEM CLEANUP" $YELLOW
-    echo -e "${YELLOW}Cleaning package cache...${NC}"
-    apt clean
-    echo -e "${YELLOW}Removing unnecessary packages...${NC}"
-    apt autoremove -y
-    echo -e "${GREEN}System cleanup completed!${NC}"
-}
-
-check_resources() {
-    draw_box "SYSTEM RESOURCES" $BLUE
-    echo -e "${BLUE}Memory Usage:${NC}"
-    free -h
-    echo
-    echo -e "${BLUE}Disk Usage:${NC}"
-    df -h
-}
-
-install_package() {
-    local package_name="$1"
-    local install_cmd="$2"
+draw_box_line() {
+    local text="$1"
+    local box_color="$2"
+    local text_color="$3"
+    local width="$4"
     
-    draw_box "INSTALLING $package_name" $PURPLE
-    echo -e "${PURPLE}Downloading and installing $package_name...${NC}"
+    # Calculate padding
+    local clean_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    local text_length=${#clean_text}
+    local total_padding=$((width - text_length - 2)) # -2 for borders
+    local padding_left=$((total_padding / 2))
+    local padding_right=$((total_padding - padding_left))
     
-    if eval "$install_cmd"; then
-        echo -e "${GREEN}$package_name installed successfully!${NC}"
-    else
-        echo -e "${RED}Failed to install $package_name!${NC}"
-    fi
+    echo -ne "${box_color}${BOX_VERT}${NC}"
+    printf "%${padding_left}s" ""
+    echo -ne "${text_color}${text}${NC}"
+    printf "%${padding_right}s" ""
+    echo -e "${box_color}${BOX_VERT}${NC}"
 }
 
 ## ---------------------------
-## Main Menu
+## Menu Display
 ## ---------------------------
 
-show_main_menu() {
-    display_header
-    show_system_info
+show_menu() {
+    local menu_width=50
     
-    draw_box "MAIN MENU" $BLUE
+    # Header
+    draw_box_top $PURPLE $menu_width
+    draw_box_line "   SERVER MANAGEMENT TOOLKIT   " $PURPLE $WHITE $menu_width
+    draw_box_line "          Version 2.2         " $PURPLE $CYAN $menu_width
+    draw_box_bottom $PURPLE $menu_width
     
-    echo -e "${BLUE}║ ${CYAN}1. System Update                 ${BLUE}║"
-    echo -e "${BLUE}║ ${CYAN}2. System Cleanup                ${BLUE}║"
-    echo -e "${BLUE}║ ${CYAN}3. Check Resources               ${BLUE}║"
-    echo -e "${BLUE}║ ${YELLOW}4. Install VPN Panel             ${BLUE}║"
-    echo -e "${BLUE}║ ${YELLOW}5. Install Speed Tools           ${BLUE}║"
-    echo -e "${BLUE}║ ${PURPLE}6. Install Management Tools      ${BLUE}║"
-    echo -e "${BLUE}║ ${RED}7. Help & Information           ${BLUE}║"
-    echo -e "${BLUE}║ ${RED}8. Exit                          ${BLUE}║"
+    # System Info
+    draw_box_top $GREEN $menu_width
+    draw_box_line "       SYSTEM INFORMATION     " $GREEN $WHITE $menu_width
+    draw_box_line " Hostname: $(hostname)" $GREEN $NC $menu_width
+    draw_box_line " IP: $(hostname -I | awk '{print $1}')" $GREEN $NC $menu_width
+    draw_box_line " Uptime: $(uptime -p)" $GREEN $NC $menu_width
+    draw_box_bottom $GREEN $menu_width
     
-    center_text "╚════════════════════════════════════════╝" $BLUE
-    echo
+    # Main Menu
+    draw_box_top $BLUE $menu_width
+    draw_box_line "          MAIN MENU           " $BLUE $WHITE $menu_width
+    draw_box_line " 1. System Update             " $BLUE $CYAN $menu_width
+    draw_box_line " 2. System Cleanup            " $BLUE $CYAN $menu_width
+    draw_box_line " 3. Check Resources           " $BLUE $CYAN $menu_width
+    draw_box_line " 4. Install VPN Panel         " $BLUE $YELLOW $menu_width
+    draw_box_line " 5. Install Speed Tools       " $BLUE $YELLOW $menu_width
+    draw_box_line " 6. Install Management Tools  " $BLUE $PURPLE $menu_width
+    draw_box_line " 7. Help & Information        " $BLUE $RED $menu_width
+    draw_box_line " 8. Exit                      " $BLUE $RED $menu_width
+    draw_box_bottom $BLUE $menu_width
 }
 
 ## ---------------------------
-## Initial Checks
-## ---------------------------
-
-# Verify root privileges
-if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}ERROR: This script must be run as root!${NC}"
-    exit 1
-fi
-
-# Check dependencies
-check_dependencies() {
-    local dependencies=("figlet" "curl" "wget")
-    local missing=()
-    
-    for dep in "${dependencies[@]}"; do
-        if ! command -v "$dep" &> /dev/null; then
-            missing+=("$dep")
-        fi
-    done
-    
-    if [ ${#missing[@]} -gt 0 ]; then
-        echo -e "${YELLOW}Installing missing dependencies...${NC}"
-        apt update && apt install -y "${missing[@]}"
-    fi
-}
-check_dependencies
-
-## ---------------------------
-## Execution Loop
+## Main Execution
 ## ---------------------------
 
 while true; do
-    show_main_menu
+    show_menu
     
     echo -ne "${CYAN}Enter your choice (1-8): ${NC}"
     read -r choice
     
     case $choice in
-        1) system_update ;;
-        2) clean_system ;;
-        3) check_resources ;;
-        4) 
-            draw_box "VPN PANELS" $YELLOW
-            echo -e "${YELLOW}1. MHSanaei 3X-UI"
-            echo -e "2. Alireza0 3X-UI"
-            echo -e "3. ZI-VPN${NC}"
-            read -p "Select VPN panel: " vpn_choice
-            ;;
-        5) 
-            draw_box "SPEED TOOLS" $PURPLE
-            echo -e "${PURPLE}1. 404 UDP Boost"
-            echo -e "2. UDP Custom Manager${NC}"
-            read -p "Select speed tool: " speed_choice
-            ;;
-        6) 
-            draw_box "MANAGEMENT TOOLS" $CYAN
-            echo -e "${CYAN}1. DARKSSH Manager"
-            echo -e "2. 404-SSH Manager"
-            echo -e "3. Selector Tool${NC}"
-            read -p "Select management tool: " mgmt_choice
-            ;;
-        7)
-            draw_box "HELP & INFORMATION" $WHITE
-            echo -e "${WHITE}This toolkit provides server management utilities."
-            echo -e "Select options from the menu to perform actions."
-            echo -e "Report issues to: $CONTACT${NC}"
-            ;;
-        8)
-            echo -e "${GREEN}Thank you for using the Server Management Toolkit!${NC}"
-            exit 0
+        [1-8]) 
+            echo -e "${GREEN}You selected option $choice${NC}"
             ;;
         *)
             echo -e "${RED}Invalid selection! Please choose 1-8.${NC}"
             ;;
     esac
     
-    echo
     read -n 1 -s -r -p "Press any key to continue..."
+    clear
 done
