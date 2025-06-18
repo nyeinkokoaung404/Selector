@@ -85,13 +85,13 @@ show_system_info() {
     draw_box_line "          System Information          " $GREEN $WHITE
     center_text "╠════════════════════════════════════════╣" $GREEN
     
-    center_text " ${STAR} ${GREEN}Hostname:${NC} $(hostname)" $GREEN
-    center_text " ${STAR} ${GREEN}IP:${NC} $(hostname -I | awk '{print $1}')" $GREEN
-    center_text " ${STAR} ${GREEN}Uptime:${NC} $(uptime -p)" $GREEN
-    center_text " ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" $GREEN
-    center_text " ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" $GREEN
-    center_text " ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')" $GREEN
-    center_text " ${STAR} ${GREEN}Disk:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" $GREEN
+    echo -e " ${STAR} ${GREEN}Hostname:${NC} $(hostname)" $GREEN
+    echo -e " ${STAR} ${GREEN}IP:${NC} $(hostname -I | awk '{print $1}')" $GREEN
+    echo -e " ${STAR} ${GREEN}Uptime:${NC} $(uptime -p)" $GREEN
+    echo -e " ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" $GREEN
+    echo -e " ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" $GREEN
+    echo -e " ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')" $GREEN
+    echo -e " ${STAR} ${GREEN}Disk:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" $GREEN
     
     center_text "╚════════════════════════════════════════╝" $GREEN
 }
