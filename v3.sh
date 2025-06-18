@@ -93,8 +93,7 @@ show_system_info() {
     
     draw_box_line " ${STAR} ${GREEN}Hostname:${NC} $(hostname)" $GREEN $WHITE
     draw_box_line " ${STAR} ${GREEN}IP:${NC} $(hostname -I | awk '{print $1}')" $GREEN $WHITE
-    draw_box_line " ${STAR} ${GREEN}Uptime:${NC} $(uptime -p)" $GREEN $WHITE
-    draw_box_line " ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" $GREEN $WHITE
+    
     draw_box_line " ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" $GREEN $WHITE
     draw_box_line " ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')" $GREEN $WHITE
     draw_box_line " ${STAR} ${GREEN}Disk:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" $GREEN $WHITE
