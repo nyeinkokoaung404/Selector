@@ -77,7 +77,7 @@ calculate_center() {
 decorative_line() {
     local length=$1
     local color=$2
-    local pattern="*•.¸♡¸.•*"
+    local pattern=""
     local repeat=$(( length / ${#pattern} + 1 ))
     echo -ne "${color}"
     printf "%0.s${pattern}" $(seq 1 $repeat) | head -c $length
