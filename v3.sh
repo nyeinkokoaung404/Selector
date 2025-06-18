@@ -4,7 +4,7 @@ clear
 ## ---------------------------
 ## Global Variables
 ## ---------------------------
-# Color Palette
+# Enhanced Color Palette
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
@@ -14,11 +14,26 @@ CYAN='\033[1;36m'
 WHITE='\033[1;37m'
 NC='\033[0m'
 
+# Box Drawing Characters
+BOX_HORIZ="═"
+BOX_VERT="║"
+BOX_CORNER_TL="╔"
+BOX_CORNER_TR="╗"
+BOX_CORNER_BL="╚"
+BOX_CORNER_BR="╝"
+BOX_T="╦"
+BOX_B="╩"
+BOX_L="╠"
+BOX_R="╣"
+BOX_CROSS="╬"
+
 # UI Elements
 CHECK="${GREEN}✔${NC}"
 CROSS="${RED}✖${NC}"
 ARROW="${CYAN}➜${NC}"
-DOT="${YELLOW}•${NC}"
+STAR="${YELLOW}✰${NC}"
+HEART="${RED}❤${NC}"
+DIAMOND="${BLUE}♦${NC}"
 
 ## ---------------------------
 ## Initial Checks
@@ -26,145 +41,161 @@ DOT="${YELLOW}•${NC}"
 
 # Root check
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "\n${RED}✖ This script must be run as root!${NC}\n" >&2
+    echo -e "${RED}This script must be run as root!${NC}"
     exit 1
 fi
 
-# Check dependencies
-check_dependencies() {
-    local missing=()
-    for cmd in figlet; do
-        if ! command -v $cmd &> /dev/null; then
-            missing+=("$cmd")
-        fi
-    done
-
-    if [ ${#missing[@]} -gt 0 ]; then
-        echo -e "${YELLOW}Installing missing dependencies...${NC}"
-        apt-get update && apt-get install -y "${missing[@]}"
-    fi
-}
-check_dependencies
+# Check and install figlet if not exists
+if ! command -v figlet &> /dev/null; then
+    echo -e "${YELLOW}Installing figlet for better display...${NC}"
+    apt-get update && apt-get install -y figlet
+fi
 
 ## ---------------------------
 ## Display Functions
 ## ---------------------------
 
-# Center text on screen
-center_text() {
-    local cols=$(tput cols)
-    local text="$1"
-    local color="$2"
-    printf "%*s\n" $(( (${#text} + cols) / 2 )) "${color}${text}${NC}"
-}
-
-# Modern box with centered content
-draw_modern_box() {
+# Function to display centered text with borders
+center() {
+    local termwidth=$(tput cols)
     local title="$1"
     local color="$2"
-    local width=60
-    local content="$3"
+    local border_char="$3"
     
-    # Calculate positions
+    local border=$(printf "%*s" "$termwidth" | tr ' ' "$border_char")
+    local padding=$(( (termwidth - ${#title} - 2) / 2 ))
+    
+    echo -e "${color}${border}${NC}"
+    printf "%*s %s %*s\n" $padding "" "${color}${title}${NC}" $padding ""
+    echo -e "${color}${border}${NC}"
+}
+
+# Improved box drawing function with proper content alignment
+draw_box() {
+    local title="$1"
+    local color="$2"
+    local width="$3"
+    local content="$4"
+    
+    # Calculate title position
     local title_len=${#title}
-    local padding=$(( (width - title_len - 4) / 2 ))
+    local padding_left=$(( (width - title_len - 2) / 2 ))
+    local padding_right=$(( width - title_len - padding_left - 2 ))
     
     # Top border
-    echo -e "${color}┌$(printf '%0.s─' $(seq 1 $((width-2))))┐${NC}"
+    echo -ne "${color}${BOX_CORNER_TL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_TR}${NC}"
     
-    # Title
-    echo -ne "${color}│${NC}"
-    printf "%$((padding))s" ""
+    # Title line
+    echo -ne "${color}${BOX_VERT}"
+    printf "%${padding_left}s" ""
     echo -ne " ${title} "
-    printf "%$((padding))s" ""
-    [ $(( (title_len + padding*2 + 2) % 2 )) -ne 0 ] && printf " "
-    echo -e "${color}│${NC}"
+    printf "%${padding_right}s" ""
+    echo -e "${BOX_VERT}${NC}"
     
-    # Separator
-    echo -e "${color}├$(printf '%0.s─' $(seq 1 $((width-2))))┤${NC}"
+    # Separator line
+    echo -ne "${color}${BOX_L}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_R}${NC}"
     
-    # Content
+    # Content lines
     while IFS= read -r line; do
         # Remove color codes for length calculation
         clean_line=$(echo -e "$line" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
         local line_len=${#clean_line}
-        local content_pad=$(( (width - line_len - 4) / 2 ))
+        local content_pad=$(( width - line_len - 3 ))
         
-        echo -ne "${color}│${NC}"
-        printf "%${content_pad}s" ""
+        echo -ne "${color}${BOX_VERT}${NC} "
         echo -ne "$line"
         printf "%${content_pad}s" ""
-        [ $(( (line_len + content_pad*2) % 2 )) -ne 0 ] && printf " "
-        echo -e "${color}│${NC}"
+        echo -e "${color}${BOX_VERT}${NC}"
     done <<< "$content"
     
     # Bottom border
-    echo -e "${color}└$(printf '%0.s─' $(seq 1 $((width-2))))┘${NC}"
+    echo -ne "${color}${BOX_CORNER_BL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
+    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
-# Display header with modern design
+# Fixed system information display
+show_system_info() {
+    local sysinfo=$(cat <<EOF
+${STAR} ${GREEN}Hostname:${NC} $(hostname)
+${STAR} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')
+${STAR} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')
+${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
+${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)
+${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}' | tr -d ' ')
+${STAR} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
+EOF
+)
+    draw_box "System Information" $GREEN 60 "$sysinfo"
+}
+
+# Beautiful header with modified text
 display_header() {
     clear
     
-    # Modern ASCII art header
-    echo -e "${BLUE}$(figlet -f slant -w $(tput cols) -c "Server Manager")${NC}"
+    # Get terminal width
+    local termwidth=$(tput cols)
     
-    # Centered information
-    center_text "Developed by 404" $PURPLE
-    center_text "Version 2.0 | $(date +'%Y-%m-%d')" $YELLOW
-    center_text "Contact: t.me/nkka404" $CYAN
+    # Calculate spacing
+    local left_title="Developed by 404"
+    local right_title="Server Management Toolkit v2.0"
+    local contact_info="Contact developer: t.me/nkka404"
     
-    # Separator line
-    echo -e "${BLUE}$(printf '%*s' $(tput cols) | tr ' ' '─')${NC}\n"
-}
-
-# System information display
-show_system_info() {
-    local sysinfo=$(cat <<EOF
-${DOT} ${GREEN}Hostname:${NC} $(hostname)
-${DOT} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')
-${DOT} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')
-${DOT} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
-${DOT} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)
-${DOT} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}' | tr -d ' ')
-${DOT} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
-EOF
-)
-    draw_modern_box "System Information" $GREEN "$sysinfo"
+    # Left aligned "Developed by 404" in red
+    echo -ne "${RED}${left_title}${NC}"
+    
+    # Calculate spaces needed between left and right titles
+    local used_space=$(( ${#left_title} + ${#right_title} ))
+    local spacing=$(( termwidth - used_space - 2 ))  # -2 for some buffer
+    
+    # Right aligned "Server Management Toolkit v2.0" in purple
+    printf "%${spacing}s" ""
+    echo -e "${PURPLE}${right_title}${NC}"
+    
+    # Center aligned contact info in green
+    local contact_pad=$(( (termwidth - ${#contact_info}) / 2 ))
+    printf "%${contact_pad}s" ""
+    echo -e "${GREEN}${contact_info}${NC}"
+    
+    echo  # Add empty line after header
 }
 
 ## ---------------------------
-## Modern Menu System
+## Menu Layout (Improved)
 ## ---------------------------
 
 show_menu() {
-    local menu_items=(
-        "System Update and Upgrade"
-        "Clean System Cache"
-        "Check Disk Space"
-        "Install MHSanaei 3X-UI"
-        "Install Alireza0 3X-UI"
-        "Install ZI-VPN"
-        "Uninstall ZI-VPN"
-        "404 UDP Boost"
-        "UDP Custom Manager"
-        "DARKSSH Manager"
-        "404-SSH Manager"
-        "Selector Tool"
-        "Server Benchmark"
-    )
+    echo -e "\n"
     
-    echo -e "\n${WHITE}Main Menu:${NC}\n"
+    # System Management and VPN Panels (side by side)
+    echo -e "${GREEN}╔═════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║   ${WHITE}System Management${GREEN}       ║   ${WHITE}VPN Panels                    ${NC}"
+    echo -e "${GREEN}╠═════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI     ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${NC}"
+    echo -e "${GREEN}║                           ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${NC}"
+    echo -e "${GREEN}╚═════════════════════════════════════════════════════════╝${NC}\n"
     
-    for i in "${!menu_items[@]}"; do
-        # Center each menu item
-        printf "%s %2d) %s\n" "${DOT}" "$i" "${menu_items[$i]}" | 
-        awk '{ len=(80-length($0))/2; printf "%*s%s\n", len, "", $0 }'
-    done
+    # Speed Optimization and SSH Managers (side by side)
+    echo -e "${CYAN}╔═════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers                 ${NC}"
+    echo -e "${CYAN}╠═════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost       ║${ARROW} ${BLUE}[30] DARKSSH Manager    ${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager  ║${ARROW} ${BLUE}[31] 404-SSH Manager    ${NC}"
+    echo -e "${CYAN}╚═════════════════════════════════════════════════════════╝${NC}\n"
     
-    echo -e "\n${WHITE}Other Options:${NC}\n"
-    center_text "help - Show help information" $YELLOW
-    center_text "exit - Quit the program" $RED
+    # Tools and Other Options (side by side)
+    echo -e "${PURPLE}╔═════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                   ║   ${WHITE}Other Options            ${NC}"
+    echo -e "${PURPLE}╠═════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool       ║${ARROW} ${RED}help Show Help       ${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark    ║${ARROW} ${RED}exit Quit Program    ${NC}"
+    echo -e "${PURPLE}╚═════════════════════════════════════════════════════════╝${NC}"
 }
 
 ## ---------------------------
@@ -172,50 +203,48 @@ show_menu() {
 ## ---------------------------
 
 system_update() {
-    draw_modern_box "System Update" $GREEN "Updating package lists and upgrading installed packages..."
+    draw_box "System Update & Upgrade" $GREEN 60 "Performing system update..."
     apt update && apt upgrade -y
-    draw_modern_box "Update Complete" $GREEN "System has been successfully updated!"
+    draw_box "System Update Complete" $GREEN 60 "System updated successfully!"
 }
 
 clean_cache() {
-    draw_modern_box "Cleaning Cache" $BLUE "Removing unnecessary package files..."
+    draw_box "Clean System Cache" $GREEN 60 "Cleaning system cache..."
     apt clean && apt autoclean
-    draw_modern_box "Cache Cleaned" $BLUE "System cache has been cleaned!"
+    draw_box "Cache Cleaned" $GREEN 60 "System cache cleaned!"
 }
 
 check_disk() {
-    local disk_info=$(df -h)
-    draw_modern_box "Disk Space Check" $YELLOW "$disk_info"
+    draw_box "Disk Space Check" $GREEN 60 "Checking disk space..."
+    df -h
 }
 
 install_mhsanaei() {
-    draw_modern_box "Installing MHSanaei 3X-UI" $PURPLE "Downloading and installing panel..."
+    draw_box "Installing MHSanaei 3X-UI" $YELLOW 60 "This may take a few minutes..."
     bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
-    draw_modern_box "Installation Complete" $PURPLE "MHSanaei 3X-UI has been installed!"
 }
 
 install_alireza() {
-    draw_modern_box "Installing Alireza0 3X-UI" $PURPLE "Downloading and installing panel..."
+    draw_box "Installing Alireza0 3X-UI" $YELLOW 60 "This may take a few minutes..."
     bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
-    draw_modern_box "Installation Complete" $PURPLE "Alireza0 3X-UI has been installed!"
 }
 
 install_zivpn() {
-    draw_modern_box "Installing ZI-VPN" $CYAN "Downloading installation script..."
+    draw_box "Installing ZI-VPN" $YELLOW 60 "This may take a few minutes..."
     wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
     chmod +x zi.sh
     ./zi.sh
 }
 
 uninstall_zivpn() {
-    draw_modern_box "Uninstalling ZI-VPN" $CYAN "Downloading uninstall script..."
+    draw_box "Uninstalling ZI-VPN" $YELLOW 60 "Removing ZI-VPN..."
     wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
     chmod +x ziun.sh
     ./ziun.sh
 }
 
 install_404udp() {
-    draw_modern_box "Installing 404 UDP Boost" $BLUE "Cloning repository..."
+    draw_box "Installing 4-0-4 UDP Script" $CYAN 60 "This may take a few minutes..."
     git clone https://github.com/nyeinkokoaung404/udp-custom
     cd udp-custom || exit
     chmod +x install.sh
@@ -223,99 +252,101 @@ install_404udp() {
 }
 
 install_udpmanager() {
-    draw_modern_box "Installing UDP Manager" $BLUE "Downloading installation script..."
+    draw_box "Installing UDP Custom Manager" $CYAN 60 "This may take a few minutes..."
     wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
     chmod +x install.sh
     bash install.sh
 }
 
 install_darkssh() {
-    draw_modern_box "Installing DARKSSH Manager" $PURPLE "Downloading manager..."
+    draw_box "Installing DARKSSH Manager" $BLUE 60 "This may take a few minutes..."
     wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark
     chmod 777 Dark
     ./Dark
 }
 
 install_404ssh() {
-    draw_modern_box "Installing 404-SSH Manager" $PURPLE "Downloading manager..."
+    draw_box "Installing 404-SSH Manager" $BLUE 60 "This may take a few minutes..."
     wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe
     chmod 777 hehe
     ./hehe
 }
 
 install_selector() {
-    draw_modern_box "Installing Selector Tool" $CYAN "Downloading and running installer..."
+    draw_box "Installing Selector Tool" $PURPLE 60 "This may take a few minutes..."
     bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
-    draw_modern_box "Installation Complete" $CYAN "Selector tool is now available!"
+    draw_box "Installation Complete" $PURPLE 60 "You can now run the tool with '404' command."
 }
 
 run_benchmark() {
-    draw_modern_box "Running Benchmark" $YELLOW "This may take several minutes..."
+    draw_box "Running Server Benchmark" $PURPLE 60 "This may take several minutes..."
     curl -sL yabs.sh | bash
 }
 
 show_help() {
-    local help_text=$(cat <<EOF
-${DOT} ${GREEN}This tool provides server management functions${NC}
-${DOT} ${YELLOW}Select options by entering their numbers${NC}
-${DOT} ${BLUE}All operations require root privileges${NC}
-${DOT} ${PURPLE}Internet connection is required for installations${NC}
-${DOT} ${CYAN}Contact developer for support: t.me/nkka404${NC}
-EOF
-)
-    draw_modern_box "Help Information" $WHITE "$help_text"
+    draw_box "HELP INFORMATION" $CYAN 60 "\
+${ARROW} ${GREEN}This tool provides quick installation of server utilities.${NC}\n\
+${ARROW} ${YELLOW}Each option will download and install software automatically.${NC}\n\
+${ARROW} ${RED}Ensure you have proper permissions before installations.${NC}\n\n\
+${STAR} ${BLUE}Key Features:${NC}\n\
+  ${DIAMOND} System Maintenance Tools\n\
+  ${DIAMOND} VPN Xray Panel Installations\n\
+  ${DIAMOND} Network Speed Optimization\n\
+  ${DIAMOND} SSH Management Utilities"
+}
+
+install_option() {
+    case $1 in
+        0) system_update ;;
+        1) clean_cache ;;
+        2) check_disk ;;
+        10) install_mhsanaei ;;
+        11) install_alireza ;;
+        12) install_zivpn ;;
+        13) uninstall_zivpn ;;
+        20) install_404udp ;;
+        21) install_udpmanager ;;
+        30) install_darkssh ;;
+        31) install_404ssh ;;
+        40) install_selector ;;
+        41) run_benchmark ;;
+        *) draw_box "Invalid Option" $RED 60 "Please select a valid option number!" ;;
+    esac
 }
 
 ## ---------------------------
 ## Main Program
 ## ---------------------------
+display_header
+show_system_info
 
-main() {
-    display_header
-    show_system_info
+while true; do
+    show_menu
     
-    while true; do
-        show_menu
-        
-        echo -e "\n"
-        center_text "${ARROW} Enter your choice (0-12/help/exit): " $WHITE
-        read -r user_input
-        
-        case $user_input in
-            help)
-                show_help
-                ;;
-            exit)
-                draw_modern_box "Goodbye" $GREEN "Thank you for using Server Management Toolkit!"
-                exit 0
-                ;;
-            [0-9]|1[0-2])
-                case $user_input in
-                    0) system_update ;;
-                    1) clean_cache ;;
-                    2) check_disk ;;
-                    3) install_mhsanaei ;;
-                    4) install_alireza ;;
-                    5) install_zivpn ;;
-                    6) uninstall_zivpn ;;
-                    7) install_404udp ;;
-                    8) install_udpmanager ;;
-                    9) install_darkssh ;;
-                    10) install_404ssh ;;
-                    11) install_selector ;;
-                    12) run_benchmark ;;
-                esac
-                ;;
-            *)
-                draw_modern_box "Invalid Input" $RED "Please enter a valid option number!"
-                ;;
-        esac
-        
-        echo -e "\n"
-        center_text "${DOT} Press any key to continue..." $YELLOW
-        read -n 1 -s -r
-        display_header
-    done
-}
-
-main
+    echo -en "${HEART} ${CYAN}Enter your choice (0-41/help/exit):${NC} "
+    read -r user_input
+    
+    case $user_input in
+        help)
+            show_help
+            echo -e "${STAR} ${YELLOW}Press any key to continue...${NC}"
+            read -n 1 -s -r
+            ;;
+        exit)
+            draw_box "Goodbye" $GREEN 60 "Thank you for using the Server Management Toolkit!"
+            echo -e "\n"
+            exit 0
+            ;;
+        *)
+            if [[ "$user_input" =~ ^[0-9]+$ ]]; then
+                install_option "$user_input"
+                echo -e "${STAR} ${YELLOW}Press any key to return to the menu...${NC}"
+                read -n 1 -s -r
+            else
+                draw_box "Invalid Input" $RED 60 "Please enter a valid option!"
+                echo -e "${STAR} ${YELLOW}Press any key to continue...${NC}"
+                read -n 1 -s -r
+            fi
+            ;;
+    esac
+done
