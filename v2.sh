@@ -52,11 +52,13 @@ draw_box_line() {
     local box_color="$2"
     local text_color="$3"
     
+    # Remove color codes and special characters for length calculation
+    local clean_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" | sed 's/✰/*/g' | sed 's/➜/>/g')
+    local text_length=${#clean_text}
+    
     # Calculate available space (2 characters less for borders)
     local terminal_width=$(tput cols)
-    local max_length=$((terminal_width - 2))
-    local clean_text=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
-    local text_length=${#clean_text}
+    local max_length=$((terminal_width - 4))  # Reduced more for better alignment
     
     if [ $text_length -gt $max_length ]; then
         text="${text:0:$max_length}"
