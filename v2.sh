@@ -36,8 +36,8 @@ HEART="${RED}❤${NC}"
 DIAMOND="${BLUE}♦${NC}"
 
 # Script Version
-SCRIPT_VERSION="2.1"
-SCRIPT_URL="https://raw.githubusercontent.com/your_repo/server-toolkit/main/toolkit.sh"
+SCRIPT_VERSION="2.2"
+SCRIPT_URL="https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/v2.sh"
 
 ## ---------------------------
 ## Initial Checks
@@ -62,7 +62,7 @@ if ! command -v screen &> /dev/null; then
 fi
 
 ## ---------------------------
-## Display Functions (Improved)
+## Display Functions
 ## ---------------------------
 
 # Function to calculate center position
@@ -71,6 +71,17 @@ calculate_center() {
     local text_length=${#1}
     local padding=$(( (termwidth - text_length) / 2 ))
     echo "$padding"
+}
+
+# Function to create decorative header line
+decorative_line() {
+    local length=$1
+    local color=$2
+    local pattern="*•.¸♡¸.•*"
+    local repeat=$(( length / ${#pattern} + 1 ))
+    echo -ne "${color}"
+    printf "%0.s${pattern}" $(seq 1 $repeat) | head -c $length
+    echo -e "${NC}"
 }
 
 # Fully centered box with content
@@ -141,23 +152,38 @@ EOF
     centered_box "System Information" $GREEN 60 "$sysinfo"
 }
 
-# Beautiful header with modified text
+## ---------------------------
+## Beautiful Header Design
+## ---------------------------
+
 display_header() {
     clear
     
-    # Display "Developed by 404" text
-    local title="Developed by 404"
-    local padding=$(calculate_center "$title")
-    printf "%*s${RED}%s${NC}\n" $padding "" "$title"
-    echo
+    # Calculate terminal width
+    local termwidth=$(tput cols)
     
-    # Main header
-    local title="Server Management Toolkit v${SCRIPT_VERSION}"
-    local dev="Contact to developer => t.me/nkka404"
-    local padding=$(calculate_center "$title")
-    printf "%*s${PURPLE}%s${NC}\n" $padding "" "$title"
-    padding=$(calculate_center "$dev")
-    printf "%*s${GREEN}%s${NC}\n" $padding "" "$dev"
+    # Top decorative line
+    decorative_line $termwidth $PURPLE
+    
+    # "Developed by 404" in beautiful design
+    local dev_text="Developed by 404"
+    local padding=$(calculate_center "$dev_text")
+    
+    # First line of the header
+    echo -e "${PURPLE}$(figlet -f slant -w $termwidth -c "Server Toolkit")${NC}"
+    
+    # Second line with version
+    local version_text="Version ${SCRIPT_VERSION}"
+    padding=$(calculate_center "$version_text")
+    printf "%*s${CYAN}%s${NC}\n" $padding "" "$version_text"
+    
+    # "Developed by" in decorative box
+    centered_box "" $RED 30 "\
+${HEART} ${RED}Developed by${NC} ${WHITE}404${NC} ${HEART}
+${DIAMOND} ${YELLOW}t.me/nkka404${NC} ${DIAMOND}"
+    
+    # Bottom decorative line
+    decorative_line $termwidth $PURPLE
 }
 
 ## ---------------------------
@@ -223,7 +249,7 @@ install_rdp() {
 }
 
 ## ---------------------------
-## Menu Layout (Improved)
+## Menu Layout
 ## ---------------------------
 
 show_menu() {
