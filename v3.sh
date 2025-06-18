@@ -52,20 +52,13 @@ draw_box_line() {
     local box_color="$2"
     local text_color="$3"
     
-    # Calculate available space (2 characters less for borders)
-    local terminal_width=$(tput cols)
-    local max_length=$((terminal_width - 2))
+    # Fixed width for menu items
+    local fixed_width=36
     local clean_text=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
     local text_length=${#clean_text}
     
-    if [ $text_length -gt $max_length ]; then
-        text="${text:0:$max_length}"
-        clean_text="${clean_text:0:$max_length}"
-        text_length=$max_length
-    fi
-    
-    local padding_left=$(( (max_length - text_length) / 2 ))
-    local padding_right=$(( max_length - text_length - padding_left ))
+    local padding_left=$(( (fixed_width - text_length) / 2 ))
+    local padding_right=$(( fixed_width - text_length - padding_left ))
     
     printf "${box_color}║${NC}%${padding_left}s${text_color}%s${NC}%${padding_right}s${box_color}║${NC}\n" "" "$text" ""
 }
@@ -85,13 +78,13 @@ show_system_info() {
     draw_box_line "          System Information          " $GREEN $WHITE
     center_text "╠════════════════════════════════════════╣" $GREEN
     
-    echo -e " ${STAR} ${GREEN}Hostname:${NC} $(hostname)" $GREEN
-    echo -e " ${STAR} ${GREEN}IP:${NC} $(hostname -I | awk '{print $1}')" $GREEN
-    echo -e " ${STAR} ${GREEN}Uptime:${NC} $(uptime -p)" $GREEN
-    echo -e " ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" $GREEN
-    echo -e " ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" $GREEN
-    echo -e " ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')" $GREEN
-    echo -e " ${STAR} ${GREEN}Disk:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" $GREEN
+    draw_box_line " ${STAR} ${GREEN}Hostname:${NC} $(hostname)" $GREEN
+    draw_box_line " ${STAR} ${GREEN}IP:${NC} $(hostname -I | awk '{print $1}')" $GREEN
+    draw_box_line " ${STAR} ${GREEN}Uptime:${NC} $(uptime -p)" $GREEN
+    draw_box_line " ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" $GREEN
+    draw_box_line " ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" $GREEN
+    draw_box_line " ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')" $GREEN
+    draw_box_line " ${STAR} ${GREEN}Disk:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" $GREEN
     
     center_text "╚════════════════════════════════════════╝" $GREEN
 }
