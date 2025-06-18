@@ -28,135 +28,123 @@ SCRIPT_URL="https://raw.githubusercontent.com/yourrepo/yourscript/main/script.sh
 ## Display Functions
 ## ---------------------------
 
-get_term_width() {
-    tput cols
+calculate_padding() {
+    local text="$1"
+    # Remove color codes for length calculation
+    local clean_text=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
+    local text_length=${#clean_text}
+    local terminal_width=$(tput cols)
+    local padding=$(( (terminal_width - text_length) / 2 ))
+    [ $padding -lt 0 ] && padding=0
+    printf "%${padding}s"
 }
 
 center_text() {
     local text="$1"
     local color="$2"
     
-    # Remove color codes for length calculation
+    # Calculate padding
     local clean_text=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
     local text_length=${#clean_text}
-    local term_width=$(get_term_width)
-    local padding=$(( (term_width - text_length) / 2 ))
-    [ $padding -lt 0 ] && padding=0
+    local terminal_width=$(tput cols)
+    local padding=$(( (terminal_width - text_length) / 2 ))
     
     printf "%*s${color}%s${NC}\n" $padding "" "$text"
 }
 
-draw_box_top() {
-    local box_color="$1"
-    local box_width=60
-    local line=$(printf "%${box_width}s" | tr ' ' '═')
-    center_text "╔${line}╗" "$box_color"
-}
-
-draw_box_bottom() {
-    local box_color="$1"
-    local box_width=60
-    local line=$(printf "%${box_width}s" | tr ' ' '═')
-    center_text "╚${line}╝" "$box_color"
-}
-
 draw_box_line() {
-    local text="$1"
-    local box_color="$2"
-    local text_color="$3"
+    local left_content="$1"
+    local right_content="$2"
+    local box_color="${3:-$GREEN}"
     
-    local box_width=60
-    local clean_text=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
-    local text_length=${#clean_text}
+    # Calculate lengths without color codes
+    local left_clean=$(echo -e "$left_content" | sed 's/\x1b\[[0-9;]*m//g')
+    local right_clean=$(echo -e "$right_content" | sed 's/\x1b\[[0-9;]*m//g')
     
-    if [ $text_length -gt $box_width ]; then
-        text="${text:0:$box_width}"
-        clean_text="${clean_text:0:$box_width}"
-        text_length=$box_width
+    local left_length=${#left_clean}
+    local right_length=${#right_clean}
+    
+    # Box dimensions
+    local box_width=44
+    local left_width=$((box_width / 2 - 1))
+    local right_width=$((box_width / 2 - 1))
+    
+    # Truncate if necessary
+    if [ $left_length -gt $left_width ]; then
+        left_content="${left_content:0:$left_width}"
+        left_clean="${left_clean:0:$left_width}"
+        left_length=$left_width
     fi
     
-    local padding_left=$(( (box_width - text_length) / 2 ))
-    local padding_right=$(( box_width - text_length - padding_left ))
+    if [ $right_length -gt $right_width ]; then
+        right_content="${right_content:0:$right_width}"
+        right_clean="${right_clean:0:$right_width}"
+        right_length=$right_width
+    fi
     
-    printf "${box_color}║${NC}%${padding_left}s${text_color}%s${NC}%${padding_right}s${box_color}║${NC}\n" "" "$text" ""
-}
-
-draw_box_separator() {
-    local box_color="$1"
-    local left_width=28
-    local right_width=30
-    local left_line=$(printf "%${left_width}s" | tr ' ' '═')
-    local right_line=$(printf "%${right_width}s" | tr ' ' '═')
-    center_text "╠${left_line}╦${right_line}╣" "$box_color"
-}
-
-draw_box_divider() {
-    local box_color="$1"
-    local left_width=28
-    local right_width=30
-    local left_line=$(printf "%${left_width}s" | tr ' ' '═')
-    local right_line=$(printf "%${right_width}s" | tr ' ' '═')
-    center_text "╠${left_line}╩${right_line}╣" "$box_color"
+    # Calculate padding
+    local left_pad=$((left_width - left_length))
+    local right_pad=$((right_width - right_length))
+    
+    # Build the line
+    local line="${box_color}║${NC}"
+    line+="$(printf "%${left_pad}s")${left_content}$(printf "%$((left_width - left_length - left_pad))s")"
+    line+="${box_color}║${NC}"
+    line+="${right_content}$(printf "%${right_pad}s")"
+    line+="${box_color}║${NC}"
+    
+    center_text "$line" ""
 }
 
 show_header() {
     clear
-    draw_box_top "$PURPLE"
-    draw_box_line "      Server Management Toolkit      " "$PURPLE" "$WHITE"
-    draw_box_bottom "$PURPLE"
+    center_text "${PURPLE}╔════════════════════════════════════════╗${NC}" ""
+    center_text "${PURPLE}║      Server Management Toolkit        ║${NC}" ""
+    center_text "${PURPLE}╚════════════════════════════════════════╝${NC}" ""
     center_text "Developed by $DEVELOPER | Version $SCRIPT_VERSION" "$CYAN"
     center_text "Contact: $CONTACT" "$CYAN"
     echo
 }
 
 show_system_info() {
-    draw_box_top "$GREEN"
-    draw_box_line "          System Information          " "$GREEN" "$WHITE"
-    draw_box_top "$GREEN"
+    center_text "${GREEN}╔════════════════════════════════════════╗${NC}" ""
+    center_text "${GREEN}║          ${WHITE}System Information${GREEN}          ║${NC}" ""
+    center_text "${GREEN}╠════════════════════════════════════════╣${NC}" ""
     
-    # Get system info
-    local hostname=$(hostname)
-    local ip=$(hostname -I | awk '{print $1}')
-    local uptime=$(uptime -p)
-    local os=$(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
-    local cpu=$(lscpu | grep 'Model name' | cut -d':' -f2 | xargs | cut -c 1-40)
-    local memory=$(free -h | awk '/Mem/{print $3"/"$2}')
-    local disk=$(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
+    draw_box_line " ${STAR} ${GREEN}Hostname:${NC} $(hostname)" "" "$GREEN"
+    draw_box_line " ${STAR} ${GREEN}IP:${NC} $(hostname -I | awk '{print $1}')" "" "$GREEN"
+    draw_box_line " ${STAR} ${GREEN}Uptime:${NC} $(uptime -p)" "" "$GREEN"
+    draw_box_line " ${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)" "" "$GREEN"
+    draw_box_line " ${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)" "" "$GREEN"
+    draw_box_line " ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}')" "" "$GREEN"
+    draw_box_line " ${STAR} ${GREEN}Disk:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')" "" "$GREEN"
     
-    draw_box_line " ${STAR} ${GREEN}Hostname:${NC} $hostname" "$GREEN"
-    draw_box_line " ${STAR} ${GREEN}IP:${NC} $ip" "$GREEN"
-    draw_box_line " ${STAR} ${GREEN}Uptime:${NC} $uptime" "$GREEN"
-    draw_box_line " ${STAR} ${GREEN}OS:${NC} $os" "$GREEN"
-    draw_box_line " ${STAR} ${GREEN}CPU:${NC} $cpu" "$GREEN"
-    draw_box_line " ${STAR} ${GREEN}Memory:${NC} $memory" "$GREEN"
-    draw_box_line " ${STAR} ${GREEN}Disk:${NC} $disk" "$GREEN"
-    
-    draw_box_bottom "$GREEN"
+    center_text "${GREEN}╚════════════════════════════════════════╝${NC}" ""
 }
 
 show_menu() {
     show_header
     show_system_info
     
-    draw_box_top "$GREEN"
-    draw_box_line "      Server Management Menu       " "$GREEN" "$WHITE"
-    draw_box_separator "$GREEN"
+    center_text "${GREEN}╔════════════════════════════════════════╗${NC}" ""
+    center_text "${GREEN}║      ${WHITE}Server Management Menu${GREEN}       ║${NC}" ""
+    center_text "${GREEN}╠══════════════════════╦═══════════════════╣${NC}" ""
     
-    draw_box_line " ${CYAN}[0]${NC} System Update    ║ ${YELLOW}[10]${NC} MHSanaei 3X-UI " "$GREEN"
-    draw_box_line " ${CYAN}[1]${NC} Clean Cache      ║ ${YELLOW}[11]${NC} Alireza0 3X-UI " "$GREEN"
-    draw_box_line " ${CYAN}[2]${NC} Check Disk      ║ ${YELLOW}[12]${NC} Install ZI-VPN " "$GREEN"
-    draw_box_line " ${CYAN}[3]${NC} Update Script   ║ ${YELLOW}[13]${NC} Remove ZI-VPN  " "$GREEN"
-    draw_box_divider "$GREEN"
+    draw_box_line " ${CYAN}[0]${NC} System Update" " ${YELLOW}[10]${NC} MHSanaei 3X-UI" "$GREEN"
+    draw_box_line " ${CYAN}[1]${NC} Clean Cache" " ${YELLOW}[11]${NC} Alireza0 3X-UI" "$GREEN"
+    draw_box_line " ${CYAN}[2]${NC} Check Disk" " ${YELLOW}[12]${NC} Install ZI-VPN" "$GREEN"
+    draw_box_line " ${CYAN}[3]${NC} Update Script" " ${YELLOW}[13]${NC} Remove ZI-VPN" "$GREEN"
+    center_text "${GREEN}╠══════════════════════╩═══════════════════╣${NC}" ""
     
-    draw_box_line " ${BLUE}[20]${NC} 404 UDP Boost  ║ ${PURPLE}[30]${NC} DARKSSH      " "$GREEN"
-    draw_box_line " ${BLUE}[21]${NC} UDP Manager    ║ ${PURPLE}[31]${NC} 404-SSH      " "$GREEN"
-    draw_box_separator "$GREEN"
+    draw_box_line " ${BLUE}[20]${NC} 404 UDP Boost" " ${PURPLE}[30]${NC} DARKSSH" "$GREEN"
+    draw_box_line " ${BLUE}[21]${NC} UDP Manager" " ${PURPLE}[31]${NC} 404-SSH" "$GREEN"
+    center_text "${GREEN}╠══════════════════════╦═══════════════════╣${NC}" ""
     
-    draw_box_line " ${PURPLE}[40]${NC} Selector      ║ ${RED}[50]${NC} Install RDP  " "$GREEN"
-    draw_box_line " ${PURPLE}[41]${NC} Benchmark     ║ ${RED}help${NC} Show Help    " "$GREEN"
-    draw_box_line "                      ║ ${RED}exit${NC} Quit        " "$GREEN"
+    draw_box_line " ${PURPLE}[40]${NC} Selector" " ${RED}[50]${NC} Install RDP" "$GREEN"
+    draw_box_line " ${PURPLE}[41]${NC} Benchmark" " ${RED}help${NC} Show Help" "$GREEN"
+    draw_box_line "" " ${RED}exit${NC} Quit" "$GREEN"
     
-    draw_box_bottom "$GREEN"
+    center_text "${GREEN}╚══════════════════════╩═══════════════════╝${NC}" ""
 }
 
 ## ---------------------------
@@ -289,19 +277,19 @@ update_script() {
 }
 
 show_help() {
-    draw_box_top "$GREEN"
-    draw_box_line "            Help Information            " "$GREEN" "$WHITE"
-    draw_box_top "$GREEN"
-    draw_box_line " ${ARROW} Enter option number to execute command" "$GREEN"
-    draw_box_line " ${ARROW} Type ${CYAN}help${NC} to show this message" "$GREEN"
-    draw_box_line " ${ARROW} Type ${CYAN}exit${NC} to quit the program" "$GREEN"
-    draw_box_line " " "$GREEN"
-    draw_box_line " ${GREEN}System Management:${NC} 0-3" "$GREEN"
-    draw_box_line " ${YELLOW}VPN Panels:${NC} 10-13" "$GREEN"
-    draw_box_line " ${BLUE}Speed Tools:${NC} 20-21" "$GREEN"
-    draw_box_line " ${PURPLE}SSH Managers:${NC} 30-31" "$GREEN"
-    draw_box_line " ${CYAN}Other Tools:${NC} 40-41,50" "$GREEN"
-    draw_box_bottom "$GREEN"
+    center_text "╔════════════════════════════════════════╗" $GREEN
+    draw_box_line "            Help Information            " $GREEN $WHITE
+    center_text "╠════════════════════════════════════════╣" $GREEN
+    draw_box_line " ${ARROW} Enter option number to execute command" $GREEN
+    draw_box_line " ${ARROW} Type ${CYAN}help${NC} to show this message" $GREEN
+    draw_box_line " ${ARROW} Type ${CYAN}exit${NC} to quit the program" $GREEN
+    draw_box_line " " $GREEN
+    draw_box_line " ${GREEN}System Management:${NC} 0-3" $GREEN
+    draw_box_line " ${YELLOW}VPN Panels:${NC} 10-13" $GREEN
+    draw_box_line " ${CYAN}Speed Tools:${NC} 20-21" $GREEN
+    draw_box_line " ${BLUE}SSH Managers:${NC} 30-31" $GREEN
+    draw_box_line " ${PURPLE}Other Tools:${NC} 40-41,50" $GREEN
+    center_text "╚════════════════════════════════════════╝" $GREEN
 }
 
 ## ---------------------------
