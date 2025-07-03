@@ -55,7 +55,7 @@ fi
 ## Display Functions
 ## ---------------------------
 
-# Function to display centered text with borders
+# Function to display centered text with borders (not used for header anymore)
 center() {
     local termwidth=$(tput cols)
     local title="$1"
@@ -133,24 +133,18 @@ EOF
     draw_box "System Information" $GREEN 60 "$sysinfo"
 }
 
-# Beautiful header with modified text
+# Beautiful header with left-aligned text
 display_header() {
     clear
     
-    # Display "Developed by 404" text
-    termwidth=$(tput cols)
-    title="Developed by 404"
-    padding=$(( (termwidth - ${#title}) / 2 ))
-    printf "%*s${RED}%s${NC}\n" $padding "" "$title"
-    echo
-    
-    # Main header
-    termwidth=$(tput cols)
-    title="Server Management Toolkit v2.0"
-    dev="Contact to developer => t.me/nkka404"
-    padding=$(( (termwidth - ${#title}) / 2 ))
-    printf "%*s${PURPLE}%s${NC}\n" $padding "" "$title"
-    printf "%*s${GREEN}%s${NC}\n" $padding "" "$dev"
+    # Display "Developed by 404" text - left-aligned
+    echo -e "${RED}Developed by 404${NC}"
+    echo # Add an empty line for spacing
+
+    # Main header - left-aligned
+    echo -e "${PURPLE}Server Management Toolkit v2.0${NC}"
+    echo -e "${GREEN}Contact to developer => t.me/nkka404${NC}"
+    echo # Add an empty line for spacing
 }
 
 ## ---------------------------
@@ -162,28 +156,28 @@ show_menu() {
     
     # System Management and VPN Panels (side by side)
     echo -e "${GREEN}╔═════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║   ${WHITE}System Management${GREEN}       ║   ${WHITE}VPN Panels                    ${NC}"
+    echo -e "${GREEN}║   ${WHITE}System Management${GREEN}         ║   ${WHITE}VPN Panels                     ${NC}"
     echo -e "${GREEN}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI     ${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI     ${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN     ${NC}"
-    echo -e "${GREEN}║                           ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN   ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI       ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI       ${NC}"
+    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN       ${NC}"
+    echo -e "${GREEN}║                         ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN     ${NC}"
     echo -e "${GREEN}╚═════════════════════════════════════════════════════════╝${NC}\n"
     
     # Speed Optimization and SSH Managers (side by side)
     echo -e "${CYAN}╔═════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers                 ${NC}"
+    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers                   ${NC}"
     echo -e "${CYAN}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost       ║${ARROW} ${BLUE}[30] DARKSSH Manager    ${NC}"
-    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager  ║${ARROW} ${BLUE}[31] 404-SSH Manager    ${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost        ║${ARROW} ${BLUE}[30] DARKSSH Manager      ${NC}"
+    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager   ║${ARROW} ${BLUE}[31] 404-SSH Manager      ${NC}"
     echo -e "${CYAN}╚═════════════════════════════════════════════════════════╝${NC}\n"
     
     # Tools and Other Options (side by side)
     echo -e "${PURPLE}╔═════════════════════════════════════════════════════════╗${NC}"
     echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                   ║   ${WHITE}Other Options            ${NC}"
     echo -e "${PURPLE}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool       ║${ARROW} ${RED}help Show Help       ${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark    ║${ARROW} ${RED}exit Quit Program    ${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool        ║${ARROW} ${RED}help Show Help         ${NC}"
+    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark     ║${ARROW} ${RED}exit Quit Program      ${NC}"
     echo -e "${PURPLE}╚═════════════════════════════════════════════════════════╝${NC}"
 }
 
