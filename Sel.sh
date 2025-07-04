@@ -45,12 +45,6 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-# Check and install figlet if not exists
-if ! command -v figlet &> /dev/null; then
-    echo -e "${YELLOW}Installing figlet for better display...${NC}"
-    apt-get update && apt-get install -y figlet
-fi
-
 ## ---------------------------
 ## Display Functions
 ## ---------------------------
