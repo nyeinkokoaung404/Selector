@@ -14,287 +14,289 @@ CYAN='\033[1;36m'
 WHITE='\033[1;37m'
 NC='\033[0m'
 
-# Box Drawing Characters
-BOX_HORIZ="═"
-BOX_VERT="║"
-BOX_CORNER_TL="╔"
-BOX_CORNER_TR="╗"
-BOX_CORNER_BL="╚"
-BOX_CORNER_BR="╝"
-BOX_T="╦"
-BOX_B="╩"
-BOX_L="╠"
-BOX_R="╣"
-BOX_CROSS="╬"
+# Box Drawing Characters (Simplified)
+BOX_HORIZ="─"
+BOX_VERT="│"
+BOX_CORNER_TL="╭"
+BOX_CORNER_TR="╮"
+BOX_CORNER_BL="╰"
+BOX_CORNER_BR="╯"
 
 # UI Elements
 CHECK="${GREEN}✔${NC}"
 CROSS="${RED}✖${NC}"
-ARROW="${CYAN}➜${NC}"
-STAR="${YELLOW}✰${NC}"
-HEART="${RED}❤${NC}"
-DIAMOND="${BLUE}♦${NC}"
+ARROW="${CYAN}»${NC}"
+STAR="${YELLOW}★${NC}"
+HEART="${RED}♥${NC}"
+DIAMOND="${BLUE}◆${NC}"
 
 ## ---------------------------
 ## Initial Checks
 ## ---------------------------
 
-# Root check
+# Root check (Allowing this line to remain in English for standard technical output)
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}This script must be run as root!${NC}"
-    exit 1
-fi
-
-# Check and install figlet if not exists
-if ! command -v figlet &> /dev/null; then
-    echo -e "${YELLOW}Installing figlet for better display...${NC}"
-    apt-get update && apt-get install -y figlet
+    echo -e "${RED}This script must be run as root!${NC}"
+    exit 1
 fi
 
 ## ---------------------------
-## Display Functions
+## Display Functions (Simplified and improved)
 ## ---------------------------
 
-# Function to display centered text with borders (not used for header anymore)
-center() {
-    local termwidth=$(tput cols)
-    local title="$1"
-    local color="$2"
-    local border_char="$3"
-    
-    local border=$(printf "%*s" "$termwidth" | tr ' ' "$border_char")
-    local padding=$(( (termwidth - ${#title} - 2) / 2 ))
-    
-    echo -e "${color}${border}${NC}"
-    printf "%*s %s %*s\n" $padding "" "${color}${title}${NC}" $padding ""
-    echo -e "${color}${border}${NC}"
-}
-
-# Improved box drawing function with proper content alignment
+# Function to display a simple, clear box for messages and data
 draw_box() {
-    local title="$1"
-    local color="$2"
-    local width="$3"
-    local content="$4"
-    
-    # Calculate title position
-    local title_len=${#title}
-    local padding_left=$(( (width - title_len - 2) / 2 ))
-    local padding_right=$(( width - title_len - padding_left - 2 ))
-    
-    # Top border
-    echo -ne "${color}${BOX_CORNER_TL}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
-    echo -e "${BOX_CORNER_TR}${NC}"
-    
-    # Title line
-    echo -ne "${color}${BOX_VERT}"
-    printf "%${padding_left}s" ""
-    echo -ne " ${title} "
-    printf "%${padding_right}s" ""
-    echo -e "${BOX_VERT}${NC}"
-    
-    # Separator line
-    echo -ne "${color}${BOX_L}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
-    echo -e "${BOX_R}${NC}"
-    
-    # Content lines
-    while IFS= read -r line; do
-        # Remove color codes for length calculation
-        clean_line=$(echo -e "$line" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
-        local line_len=${#clean_line}
-        local content_pad=$(( width - line_len - 3 ))
-        
-        echo -ne "${color}${BOX_VERT}${NC} "
-        echo -ne "$line"
-        printf "%${content_pad}s" ""
-        echo -e "${color}${BOX_VERT}${NC}"
-    done <<< "$content"
-    
-    # Bottom border
-    echo -ne "${color}${BOX_CORNER_BL}"
-    printf "%0.s${BOX_HORIZ}" $(seq 1 $((width-2)))
-    echo -e "${BOX_CORNER_BR}${NC}"
+    local title="$1"
+    local color="$2"
+    local content="$3"
+    local box_width=60
+    local title_len=${#title}
+    
+    # Top border with title centered
+    local top_left=$(( (box_width - title_len - 4) / 2 ))
+    local top_right=$(( box_width - title_len - top_left - 4 ))
+    
+    echo -ne "${color}${BOX_CORNER_TL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $top_left)
+    echo -ne "[ ${WHITE}${title}${color} ]"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $top_right)
+    echo -e "${BOX_CORNER_TR}${NC}"
+    
+    # Content lines
+    while IFS= read -r line; do
+        # Remove color codes for length calculation
+        clean_line=$(echo -e "$line" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+        local line_len=${#clean_line}
+        local content_pad=$(( box_width - line_len - 3 ))
+        
+        echo -ne "${color}${BOX_VERT}${NC} "
+        echo -ne "$line"
+        printf "%${content_pad}s" ""
+        echo -e "${color}${BOX_VERT}${NC}"
+    done <<< "$content"
+    
+    # Bottom border
+    echo -ne "${color}${BOX_CORNER_BL}"
+    printf "%0.s${BOX_HORIZ}" $(seq 1 $((box_width-2)))
+    echo -e "${BOX_CORNER_BR}${NC}"
 }
 
-# Fixed system information display
+# System information display (Updated with Burmese title)
 show_system_info() {
-    local sysinfo=$(cat <<EOF
+    local sysinfo=$(cat <<EOF
 ${STAR} ${GREEN}Hostname:${NC} $(hostname)
 ${STAR} ${GREEN}IP Address:${NC} $(hostname -I | awk '{print $1}')
 ${STAR} ${GREEN}Uptime:${NC} $(uptime -p | sed 's/up //')
-${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
-${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs)
+${STAR} ${GREEN}OS:${NC} $(grep PRETTY_NAME /etc/os-release 2>/dev/null | cut -d'"' -f2 || echo "Unknown Linux")
+${STAR} ${GREEN}CPU:${NC} $(lscpu | grep 'Model name' | cut -d':' -f2 | xargs | head -n 1)
 ${STAR} ${GREEN}Memory:${NC} $(free -h | awk '/Mem/{print $3"/"$2}' | tr -d ' ')
 ${STAR} ${GREEN}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $3"/"$2 " ("$5")"}')
 EOF
 )
-    draw_box "System Information" $GREEN 60 "$sysinfo"
+    draw_box "စနစ်ဆိုင်ရာ အချက်အလက်များ" $GREEN 60 "$sysinfo"
 }
 
-# Beautiful header with left-aligned text
+# Beautiful header (Simplified)
 display_header() {
-    clear
-    
-    # Display "Developed by 404" text - left-aligned
-    echo -e "${RED}Developed by 404${NC}"
-    echo # Add an empty line for spacing
-
-    # Main header - left-aligned
-    echo -e "${PURPLE}Server Management Toolkit v2.0${NC}"
-    echo -e "${GREEN}Contact to developer => t.me/nkka404${NC}"
-    echo # Add an empty line for spacing
+    clear
+    local termwidth=$(tput cols)
+    local title="ဆာဗာ စီမံခန့်ခွဲရေး ကိရိယာအစုံ v2.0"
+    local dev="ဆက်သွယ်ရန်: t.me/nkka404"
+    
+    echo -e "${PURPLE}======================================================${NC}"
+    printf "${PURPLE}%*s%s%*s${NC}\n" $(((termwidth - ${#title}) / 2)) "" "$title" $(((termwidth - ${#title}) / 2)) ""
+    printf "${GREEN}%*s%s%*s${NC}\n" $(((termwidth - ${#dev}) / 2)) "" "$dev" $(((termwidth - ${#dev}) / 2)) ""
+    echo -e "${PURPLE}======================================================${NC}"
+    echo
 }
 
 ## ---------------------------
-## Menu Layout (Improved)
+## Menu Layout (Simplified and Modular)
 ## ---------------------------
+
+# Function to display a menu section
+display_section() {
+    local title="$1"
+    local color="$2"
+    local content="$3"
+    
+    echo -e "${color}${ARROW} ${WHITE}${title}${NC}"
+    echo -e "${content}"
+    echo -e "${color}--------------------------------------${NC}"
+}
 
 show_menu() {
-    echo -e "\n"
-    
-    # System Management and VPN Panels (side by side)
-    echo -e "${GREEN}╔═════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║   ${WHITE}System Management${GREEN}         ║   ${WHITE}VPN Panels                     ${NC}"
-    echo -e "${GREEN}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[0] System Update        ║${ARROW} ${YELLOW}[10] MHSanaei 3X-UI       ${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[1] Clean System Cache   ║${ARROW} ${YELLOW}[11] Alireza0 3X-UI       ${NC}"
-    echo -e "${GREEN}║${ARROW} ${GREEN}[2] Check Disk Space     ║${ARROW} ${YELLOW}[12] Install ZI-VPN       ${NC}"
-    echo -e "${GREEN}║                         ║${ARROW} ${YELLOW}[13] Uninstall ZI-VPN     ${NC}"
-    echo -e "${GREEN}╚═════════════════════════════════════════════════════════╝${NC}\n"
-    
-    # Speed Optimization and SSH Managers (side by side)
-    echo -e "${CYAN}╔═════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║   ${WHITE}Speed Optimization${CYAN}      ║   ${WHITE}SSH Managers                   ${NC}"
-    echo -e "${CYAN}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${CYAN}║${ARROW} ${CYAN}[20] 404 UDP Boost        ║${ARROW} ${BLUE}[30] DARKSSH Manager      ${NC}"
-    echo -e "${CYAN}║${ARROW} ${CYAN}[21] UDP Custom Manager   ║${ARROW} ${BLUE}[31] 404-SSH Manager      ${NC}"
-    echo -e "${CYAN}╚═════════════════════════════════════════════════════════╝${NC}\n"
-    
-    # Tools and Other Options (side by side)
-    echo -e "${PURPLE}╔═════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║   ${WHITE}Tools${PURPLE}                   ║   ${WHITE}Other Options            ${NC}"
-    echo -e "${PURPLE}╠═════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[40] Selector Tool        ║${ARROW} ${RED}help Show Help         ${NC}"
-    echo -e "${PURPLE}║${ARROW} ${PURPLE}[41] Server Benchmark     ║${ARROW} ${RED}exit Quit Program      ${NC}"
-    echo -e "${PURPLE}╚═════════════════════════════════════════════════════════╝${NC}"
+    echo -e "\n${CYAN}╭───────────────────────────────────────────────────╮${NC}"
+    echo -e "${CYAN}│ ${WHITE} ပင်မ ရွေးချယ်စရာများ စာရင်း ${CYAN} │${NC}"
+    echo -e "${CYAN}├───────────────────────────────────────────────────┤${NC}"
+    
+    # 1. System Management
+    local sys_mgmt=$(cat <<EOF
+${ARROW} ${GREEN}[0] ${WHITE}စနစ် မွမ်းမံခြင်း (System Update)
+${ARROW} ${GREEN}[1] ${WHITE}စနစ် ကက်ရှ် သန့်ရှင်းရေး (Clean System Cache)
+${ARROW} ${GREEN}[2] ${WHITE}ဒစ်ခ် နေရာ စစ်ဆေးခြင်း (Check Disk Space)
+EOF
+)
+    display_section "စနစ် စီမံခန့်ခွဲမှု" $GREEN "$sys_mgmt"
+    
+    # 2. VPN Panels
+    local vpn_panels=$(cat <<EOF
+${ARROW} ${YELLOW}[10] ${WHITE}MHSanaei 3X-UI ထည့်သွင်းရန်
+${ARROW} ${YELLOW}[11] ${WHITE}Alireza0 3X-UI ထည့်သွင်းရန်
+${ARROW} ${YELLOW}[12] ${WHITE}ZI-VPN ထည့်သွင်းရန် (Install)
+${ARROW} ${YELLOW}[13] ${WHITE}ZI-VPN ဖယ်ရှားရန် (Uninstall)
+EOF
+)
+    display_section "VPN ထိန်းချုပ်ခုံများ" $YELLOW "$vpn_panels"
+    
+    # 3. Speed Optimization
+    local speed_opt=$(cat <<EOF
+${ARROW} ${CYAN}[20] ${WHITE}404 UDP Boost ထည့်သွင်းရန်
+${ARROW} ${CYAN}[21] ${WHITE}UDP Custom Manager ထည့်သွင်းရန်
+EOF
+)
+    display_section "အမြန်နှုန်း မြှင့်တင်ခြင်း" $CYAN "$speed_opt"
+    
+    # 4. SSH Managers
+    local ssh_mgmt=$(cat <<EOF
+${ARROW} ${BLUE}[30] ${WHITE}DARKSSH Manager ထည့်သွင်းရန်
+${ARROW} ${BLUE}[31] ${WHITE}404-SSH Manager ထည့်သွင်းရန်
+EOF
+)
+    display_section "SSH မန်နေဂျာများ" $BLUE "$ssh_mgmt"
+    
+    # 5. Tools & Others
+    local tools_others=$(cat <<EOF
+${ARROW} ${PURPLE}[40] ${WHITE}Selector Tool ထည့်သွင်းရန်
+${ARROW} ${PURPLE}[41] ${WHITE}ဆာဗာ စွမ်းဆောင်ရည် စစ်ဆေးရန် (Benchmark)
+${ARROW} ${RED}help ${WHITE}အကူအညီ ပြသရန်
+${ARROW} ${RED}exit ${WHITE}ပရိုဂရမ်မှ ထွက်ရန်
+EOF
+)
+    display_section "ကိရိယာများ & အခြား ရွေးချယ်စရာများ" $PURPLE "$tools_others"
+    
+    echo -e "${CYAN}╰───────────────────────────────────────────────────╯${NC}"
 }
 
 ## ---------------------------
-## Installation Functions
+## Installation Functions (kept in English for technical logic)
 ## ---------------------------
 
 system_update() {
-    draw_box "System Update & Upgrade" $GREEN 60 "Performing system update..."
-    apt update && apt upgrade -y
-    draw_box "System Update Complete" $GREEN 60 "System updated successfully!"
+    draw_box "စနစ် မွမ်းမံခြင်း" $GREEN "မွမ်းမံမှုများ လုပ်ဆောင်နေပါသည်..."
+    apt update && apt upgrade -y
+    draw_box "မွမ်းမံမှု ပြီးဆုံးခြင်း" $GREEN "စနစ်ကို အောင်မြင်စွာ မွမ်းမံပြီးပါပြီ!"
 }
 
 clean_cache() {
-    draw_box "Clean System Cache" $GREEN 60 "Cleaning system cache..."
-    apt clean && apt autoclean
-    draw_box "Cache Cleaned" $GREEN 60 "System cache cleaned!"
+    draw_box "ကက်ရှ် သန့်ရှင်းရေး" $GREEN "စနစ် ကက်ရှ်ကို ရှင်းလင်းနေပါသည်..."
+    apt clean && apt autoclean
+    draw_box "ကက်ရှ် ရှင်းလင်းပြီး" $GREEN "စနစ် ကက်ရှ်ကို ရှင်းလင်းပြီးပါပြီ!"
 }
 
 check_disk() {
-    draw_box "Disk Space Check" $GREEN 60 "Checking disk space..."
-    df -h
+    local disk_info=$(df -h)
+    draw_box "ဒစ်ခ် နေရာ စစ်ဆေးခြင်း" $GREEN "$disk_info"
 }
 
 install_mhsanaei() {
-    draw_box "Installing MHSanaei 3X-UI" $YELLOW 60 "This may take a few minutes..."
-    bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+    draw_box "MHSanaei 3X-UI ထည့်သွင်းခြင်း" $YELLOW "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+    echo -e "\n${CHECK} MHSanaei 3X-UI ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_alireza() {
-    draw_box "Installing Alireza0 3X-UI" $YELLOW 60 "This may take a few minutes..."
-    bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+    draw_box "Alireza0 3X-UI ထည့်သွင်းခြင်း" $YELLOW "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+    echo -e "\n${CHECK} Alireza0 3X-UI ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_zivpn() {
-    draw_box "Installing ZI-VPN" $YELLOW 60 "This may take a few minutes..."
-    wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
-    chmod +x zi.sh
-    ./zi.sh
+    draw_box "ZI-VPN ထည့်သွင်းခြင်း" $YELLOW "စတင် ထည့်သွင်းပါသည်..."
+    wget -O zi.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/zi.sh
+    chmod +x zi.sh
+    ./zi.sh
+    echo -e "\n${CHECK} ZI-VPN ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 uninstall_zivpn() {
-    draw_box "Uninstalling ZI-VPN" $YELLOW 60 "Removing ZI-VPN..."
-    wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
-    chmod +x ziun.sh
-    ./ziun.sh
+    draw_box "ZI-VPN ဖယ်ရှားခြင်း" $YELLOW "ZI-VPN ကို ဖယ်ရှားနေပါသည်..."
+    wget -O ziun.sh https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/uninstall.sh
+    chmod +x ziun.sh
+    ./ziun.sh
+    echo -e "\n${CHECK} ZI-VPN ဖယ်ရှားမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_404udp() {
-    draw_box "Installing 4-0-4 UDP Script" $CYAN 60 "This may take a few minutes..."
-    git clone https://github.com/nyeinkokoaung404/udp-custom
-    cd udp-custom || exit
-    chmod +x install.sh
-    ./install.sh
+    draw_box "4-0-4 UDP Script ထည့်သွင်းခြင်း" $CYAN "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    git clone https://github.com/nyeinkokoaung404/udp-custom || { echo -e "${CROSS} Git Clone မအောင်မြင်ပါ"; return 1; }
+    cd udp-custom || { echo -e "${CROSS} Directory သို့ မဝင်နိုင်ပါ"; return 1; }
+    chmod +x install.sh
+    ./install.sh
+    cd .. # Go back to original directory
+    echo -e "\n${CHECK} 4-0-4 UDP Script ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_udpmanager() {
-    draw_box "Installing UDP Custom Manager" $CYAN 60 "This may take a few minutes..."
-    wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
-    chmod +x install.sh
-    bash install.sh
+    draw_box "UDP Custom Manager ထည့်သွင်းခြင်း" $CYAN "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    wget "https://raw.githubusercontent.com/noobconner21/UDP-Custom-Script/main/install.sh" -O install.sh
+    chmod +x install.sh
+    bash install.sh
+    echo -e "\n${CHECK} UDP Custom Manager ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_darkssh() {
-    draw_box "Installing DARKSSH Manager" $BLUE 60 "This may take a few minutes..."
-    wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark
-    chmod 777 Dark
-    ./Dark
+    draw_box "DARKSSH Manager ထည့်သွင်းခြင်း" $BLUE "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    wget https://raw.githubusercontent.com/sbatrow/DARKSSH-MANAGER/master/Dark -O Dark
+    chmod 777 Dark
+    ./Dark
+    echo -e "\n${CHECK} DARKSSH Manager ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_404ssh() {
-    draw_box "Installing 404-SSH Manager" $BLUE 60 "This may take a few minutes..."
-    wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe
-    chmod 777 hehe
-    ./hehe
+    draw_box "404-SSH Manager ထည့်သွင်းခြင်း" $BLUE "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    wget https://raw.githubusercontent.com/nyeinkokoaung404/ssh-manger/main/hehe -O hehe
+    chmod 777 hehe
+    ./hehe
+    echo -e "\n${CHECK} 404-SSH Manager ထည့်သွင်းမှု ပြီးဆုံးပါပြီ။"
 }
 
 install_selector() {
-    draw_box "Installing Selector Tool" $PURPLE 60 "This may take a few minutes..."
-    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
-    draw_box "Installation Complete" $PURPLE 60 "You can now run the tool with '404' command."
+    draw_box "Selector Tool ထည့်သွင်းခြင်း" $PURPLE "မိနစ်အနည်းငယ် ကြာနိုင်ပါသည်..."
+    bash <(curl -fsSL https://raw.githubusercontent.com/nyeinkokoaung404/Selector/main/install.sh)
+    draw_box "ထည့်သွင်းမှု ပြီးဆုံး" $PURPLE "ယခုအခါ '404' command ဖြင့် tool ကို run နိုင်ပါပြီ။"
 }
 
 run_benchmark() {
-    draw_box "Running Server Benchmark" $PURPLE 60 "This may take several minutes..."
-    curl -sL yabs.sh | bash
+    draw_box "ဆာဗာ စွမ်းဆောင်ရည် စစ်ဆေးခြင်း" $PURPLE "စစ်ဆေးမှု စတင်ပါပြီ။ အချိန်အနည်းငယ် ကြာမြင့်နိုင်ပါသည်..."
+    curl -sL yabs.sh | bash
+    echo -e "\n${CHECK} စွမ်းဆောင်ရည် စစ်ဆေးမှု ပြီးဆုံးပါပြီ။"
 }
 
 show_help() {
-    draw_box "HELP INFORMATION" $CYAN 60 "\
-${ARROW} ${GREEN}This tool provides quick installation of server utilities.${NC}\n\
-${ARROW} ${YELLOW}Each option will download and install software automatically.${NC}\n\
-${ARROW} ${RED}Ensure you have proper permissions before installations.${NC}\n\n\
-${STAR} ${BLUE}Key Features:${NC}\n\
-  ${DIAMOND} System Maintenance Tools\n\
-  ${DIAMOND} VPN Xray Panel Installations\n\
-  ${DIAMOND} Network Speed Optimization\n\
-  ${DIAMOND} SSH Management Utilities"
+    draw_box "အကူအညီဆိုင်ရာ အချက်အလက်များ" $CYAN "\
+${ARROW} ${GREEN}ဤ tool သည် ဆာဗာ utility များကို လျင်မြန်စွာ ထည့်သွင်းရန် ကူညီပေးပါသည်။${NC}\n\
+${ARROW} ${YELLOW}ရွေးချယ်စရာတိုင်းသည် software ကို အလိုအလျောက် download လုပ်ပြီး install လုပ်ပါမည်။${NC}\n\
+${ARROW} ${RED}ထည့်သွင်းခြင်းမပြုမီ သင့်လျော်သော root ခွင့်ပြုချက်များ ရှိရန် သေချာပါစေ။${NC}"
 }
 
 install_option() {
-    case $1 in
-        0) system_update ;;
-        1) clean_cache ;;
-        2) check_disk ;;
-        10) install_mhsanaei ;;
-        11) install_alireza ;;
-        12) install_zivpn ;;
-        13) uninstall_zivpn ;;
-        20) install_404udp ;;
-        21) install_udpmanager ;;
-        30) install_darkssh ;;
-        31) install_404ssh ;;
-        40) install_selector ;;
-        41) run_benchmark ;;
-        *) draw_box "Invalid Option" $RED 60 "Please select a valid option number!" ;;
-    esac
+    case $1 in
+        0) system_update ;;
+        1) clean_cache ;;
+        2) check_disk ;;
+        10) install_mhsanaei ;;
+        11) install_alireza ;;
+        12) install_zivpn ;;
+        13) uninstall_zivpn ;;
+        20) install_404udp ;;
+        21) install_udpmanager ;;
+        30) install_darkssh ;;
+        31) install_404ssh ;;
+        40) install_selector ;;
+        41) run_benchmark ;;
+        *) draw_box "မှားယွင်းသော ရွေးချယ်မှု" $RED "ကျေးဇူးပြု၍ မှန်ကန်သော နံပါတ်ကို ရွေးချယ်ပါ!" ;;
+    esac
 }
 
 ## ---------------------------
@@ -304,32 +306,32 @@ display_header
 show_system_info
 
 while true; do
-    show_menu
-    
-    echo -en "${HEART} ${CYAN}Enter your choice (0-41/help/exit):${NC} "
-    read -r user_input
-    
-    case $user_input in
-        help)
-            show_help
-            echo -e "${STAR} ${YELLOW}Press any key to continue...${NC}"
-            read -n 1 -s -r
-            ;;
-        exit)
-            draw_box "Goodbye" $GREEN 60 "Thank you for using the Server Management Toolkit!"
-            echo -e "\n"
-            exit 0
-            ;;
-        *)
-            if [[ "$user_input" =~ ^[0-9]+$ ]]; then
-                install_option "$user_input"
-                echo -e "${STAR} ${YELLOW}Press any key to return to the menu...${NC}"
-                read -n 1 -s -r
-            else
-                draw_box "Invalid Input" $RED 60 "Please enter a valid option!"
-                echo -e "${STAR} ${YELLOW}Press any key to continue...${NC}"
-                read -n 1 -s -r
-            fi
-            ;;
-    esac
+    show_menu
+    
+    echo -en "${HEART} ${CYAN}သင်၏ ရွေးချယ်မှုကို ထည့်ပါ (0-41/help/exit):${NC} "
+    read -r user_input
+    
+    case $user_input in
+        help)
+            show_help
+            echo -e "${STAR} ${YELLOW}ဆက်လက်လုပ်ဆောင်ရန် မည်သည့် ခလုတ်ကိုမဆို နှိပ်ပါ...${NC}"
+            read -n 1 -s -r
+            ;;
+        exit)
+            draw_box "နှုတ်ဆက်ခြင်း" $GREEN "Server Management Toolkit ကို အသုံးပြုသည့်အတွက် ကျေးဇူးတင်ပါသည်!"
+            echo -e "\n"
+            exit 0
+            ;;
+        *)
+            if [[ "$user_input" =~ ^[0-9]+$ ]]; then
+                install_option "$user_input"
+                echo -e "${STAR} ${YELLOW}Menu သို့ ပြန်သွားရန် မည်သည့် ခလုတ်ကိုမဆို နှိပ်ပါ...${NC}"
+                read -n 1 -s -r
+            else
+                draw_box "မှားယွင်းသော ထည့်သွင်းမှု" $RED "မှန်ကန်သော ရွေးချယ်မှု (နံပါတ်/help/exit) ကို ထည့်ပါ!"
+                echo -e "${STAR} ${YELLOW}ဆက်လက်လုပ်ဆောင်ရန် မည်သည့် ခလုတ်ကိုမဆို နှိပ်ပါ...${NC}"
+                read -n 1 -s -r
+            fi
+            ;;
+    esac
 done
