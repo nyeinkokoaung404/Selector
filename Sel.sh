@@ -305,7 +305,7 @@ display_header() {
     get_system_info
     
     # Main header
-    draw_box "CHANNEL 404 TUNNEL" $CYAN ""
+    draw_box "SERVER MANAGEMENT TOOLKIT" $CYAN ""
     
     # System info box
     local sysinfo=$(cat <<EOF
