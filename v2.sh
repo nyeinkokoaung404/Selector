@@ -23,8 +23,6 @@ BOX_CORNER_BR="┛"
 
 # UI Settings
 BOX_WIDTH=60
-CHECK_ON="${GREEN}RUN${NC}"
-CHECK_OFF="${RED}OFF${NC}"
 
 ## ---------------------------
 ## Initial Checks
@@ -39,29 +37,6 @@ fi
 ## ---------------------------
 ## Helper Functions (အကူအညီပေးသော လုပ်ဆောင်ချက်များ)
 ## ---------------------------
-
-# Function to simulate service status check (ဝန်ဆောင်မှု အခြေအနေ စစ်ဆေးရန်)
-get_service_status() {
-    # ဤနေရာတွင် ဝန်ဆောင်မှု (ဥပမာ: systemctl is-active nginx) ကို စစ်ဆေးနိုင်သည်။
-    # ယခုအတွက် ဥပမာအနေဖြင့် ကျပန်း (Random) အခြေအနေ ပြန်ပေးပါမည်။
-    case $1 in
-        nginx)
-            # Nginx ကို ပိတ်ထားသည်ဟု ယူဆပါ။
-            echo "$CHECK_OFF"
-            ;;
-        xray)
-            # Xray ကို ဖွင့်ထားသည်ဟု ယူဆပါ။
-            echo "$CHECK_ON"
-            ;;
-        ws)
-            # WS (Websocket) ကို ဖွင့်ထားသည်ဟု ယူဆပါ။
-            echo "$CHECK_ON"
-            ;;
-        *)
-            echo "$CHECK_OFF"
-            ;;
-    esac
-}
 
 # Function to get simplified uptime (uptime ကိုရယူရန်)
 get_simple_uptime() {
@@ -168,16 +143,6 @@ EOF
     draw_box "စနစ်အချက်အလက် (System Info)" $GREEN "$sysinfo"
 }
 
-# Display status check (အခြေအနေစစ်ဆေးမှု ပြသရန်)
-show_service_status() {
-    local status_line=$(cat <<EOF
-${CYAN}NGINX${WHITE} : [$(get_service_status "nginx")]   ${CYAN}XRAY${WHITE} : [$(get_service_status "xray")]   ${CYAN}WS${WHITE} : [$(get_service_status "ws")]
-EOF
-)
-    draw_box "" $YELLOW "$status_line"
-}
-
-
 # Display the main menu (အဓိက Menu ပြသရန်)
 show_menu() {
     local menu_content=$(cat <<EOF
@@ -218,7 +183,7 @@ EOF
 
 
 ## ---------------------------
-## Installation Functions (တပ်ဆင်ခြင်း လုပ်ဆောင်ချက်များ - မပြောင်းလဲပါ)
+## Installation Functions (တပ်ဆင်ခြင်း လုပ်ဆောင်ချက်များ)
 ## ---------------------------
 
 system_update() {
@@ -311,7 +276,7 @@ show_help() {
 }
 
 install_option() {
-    case $1 in
+    case "$1" in
         1) system_update ;;
         2) clean_cache ;;
         3) check_disk ;;
@@ -336,7 +301,6 @@ install_option() {
 # Display everything initially (အစပိုင်းတွင် အားလုံးပြသရန်)
 display_header
 show_system_info
-show_service_status
 
 while true; do
     show_menu
@@ -345,7 +309,7 @@ while true; do
     echo -en "${CYAN}●${NC}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ}${BOX_HORIZ} ${CYAN}ရွေးချယ်ပါ (1-13/00/help):${NC} "
     read -r user_input
     
-    case $user_input in
+    case "$user_input" in
         help|HELP)
             show_help
             echo -e "${YELLOW}Press any key to continue...${NC}"
@@ -353,7 +317,6 @@ while true; do
             # Re-display the main UI after action
             display_header
             show_system_info
-            show_service_status
             ;;
         0|00)
             draw_box "နှုတ်ဆက်ခြင်း" $GREEN "Server Management Toolkit ကို အသုံးပြုပေးလို့ ကျေးဇူးတင်ပါတယ်!"
@@ -368,7 +331,6 @@ while true; do
                 # Re-display the main UI after action
                 display_header
                 show_system_info
-                show_service_status
             else
                 draw_box "ထည့်သွင်းမှု မှားယွင်းခြင်း" $RED "ကျေးဇူးပြု၍ မှန်ကန်သော ရွေးချယ်မှု သို့မဟုတ် 'help' ကို ထည့်သွင်းပါ!"
                 echo -e "${YELLOW}Press any key to continue...${NC}"
@@ -376,7 +338,6 @@ while true; do
                 # Re-display the main UI after action
                 display_header
                 show_system_info
-                show_service_status
             fi
             ;;
     esac
