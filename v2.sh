@@ -198,6 +198,57 @@ reboot_vps() {
     reboot
 }
 
+check_vps_status() {
+    draw_simple_box "${GREEN}Checking VPS Status...${NC}" $GREEN
+    echo -e "${WHITE}CPU Usage:${NC} $(top -bn1 | grep "Cpu(s)" | awk '{print $2}')%"
+    echo -e "${WHITE}Memory Usage:${NC} $(free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2}')"
+    echo -e "${WHITE}Disk Usage:${NC} $(df -h / | awk 'NR==2{print $5}')"
+    echo -e "${WHITE}Uptime:${NC} $(uptime -p)"
+}
+
+clean_vps_logs() {
+    draw_simple_box "${YELLOW}Cleaning VPS Logs...${NC}" $YELLOW
+    echo "" > /var/log/syslog
+    echo "" > /var/log/auth.log
+    journalctl --vacuum-time=1d
+    draw_simple_box "${GREEN}VPS logs cleaned successfully!${NC}" $GREEN
+}
+
+show_vpn_port_info() {
+    draw_simple_box "${BLUE}VPN Port Information...${NC}" $BLUE
+    netstat -tulpn | grep -E ':(80|443|8080|8443)'
+}
+
+setup_dns_panel() {
+    draw_simple_box "${CYAN}Setting up DNS Panel...${NC}" $CYAN
+    echo "DNS Panel installation would go here"
+}
+
+setup_domain_panel() {
+    draw_simple_box "${CYAN}Setting up Domain Panel...${NC}" $CYAN
+    echo "Domain Panel installation would go here"
+}
+
+setup_ipv6_panel() {
+    draw_simple_box "${CYAN}Setting up IPv6 Panel...${NC}" $CYAN
+    echo "IPv6 Panel installation would go here"
+}
+
+setup_netguard_panel() {
+    draw_simple_box "${CYAN}Setting up NetGuard Panel...${NC}" $CYAN
+    echo "NetGuard Panel installation would go here"
+}
+
+setup_trojan_menu() {
+    draw_simple_box "${PURPLE}Setting up Trojan Menu...${NC}" $PURPLE
+    echo "Trojan configuration would go here"
+}
+
+setup_socks_menu() {
+    draw_simple_box "${PURPLE}Setting up SOCKS Menu...${NC}" $PURPLE
+    echo "SOCKS configuration would go here"
+}
+
 ## ---------------------------
 ## Menu Display
 ## ---------------------------
@@ -222,9 +273,9 @@ EOF
     # Main menu
     local mainmenu=$(cat <<EOF
 
-${WHITE}[01] • SSH/WS MENU        [04] • TROJAN MENU${NC}
-${WHITE}[02] • VMESS MENU         [05] • SOCKS MENU${NC}
-${WHITE}[03] • VLESS MENU         [06] • ZIVPN MENU${NC}
+${WHITE}[01] • 404-SSH Manager     [04] • Trojan Setup${NC}
+${WHITE}[02] • MHSanaei 3X-UI      [05] • SOCKS Setup${NC}
+${WHITE}[03] • Alireza0 3X-UI      [06] • ZI-VPN Install${NC}
 EOF
 )
     draw_box "MENU" $GREEN "$mainmenu"
@@ -232,10 +283,10 @@ EOF
     # Tools menu
     local toolsmenu=$(cat <<EOF
 
-${WHITE}[07] • DNS PANEL          [11] • NETGUARD PANEL${NC}
-${WHITE}[08] • DOMAIN PANEL       [12] • VPN PORT INFO${NC}
-${WHITE}[09] • IPV6 PANEL         [13] • CLEAN VPS LOGS${NC}
-${WHITE}[10] • VPS STATUS${NC}
+${WHITE}[07] • DNS Panel Setup     [11] • NetGuard Panel${NC}
+${WHITE}[08] • Domain Panel        [12] • VPN Port Info${NC}
+${WHITE}[09] • IPv6 Panel          [13] • Clean VPS Logs${NC}
+${WHITE}[10] • VPS Status${NC}
 
 ${WHITE}[00] • EXIT               [88] • REBOOT VPS${NC}
 EOF
@@ -264,8 +315,8 @@ handle_main_menu() {
         01) install_404ssh ;;
         02) install_mhsanaei ;;
         03) install_alireza ;;
-        04) echo "Trojan Menu - Add your implementation here" ;;
-        05) echo "SOCKS Menu - Add your implementation here" ;;
+        04) setup_trojan_menu ;;
+        05) setup_socks_menu ;;
         06) install_zivpn ;;
         *) return 1 ;;
     esac
@@ -274,13 +325,13 @@ handle_main_menu() {
 
 handle_tools_menu() {
     case $1 in
-        07) echo "DNS Panel - Add your implementation here" ;;
-        08) echo "Domain Panel - Add your implementation here" ;;
-        09) echo "IPv6 Panel - Add your implementation here" ;;
-        10) echo "VPS Status - Add your implementation here" ;;
-        11) echo "NetGuard Panel - Add your implementation here" ;;
-        12) echo "VPN Port Info - Add your implementation here" ;;
-        13) clean_cache ;;
+        07) setup_dns_panel ;;
+        08) setup_domain_panel ;;
+        09) setup_ipv6_panel ;;
+        10) check_vps_status ;;
+        11) setup_netguard_panel ;;
+        12) show_vpn_port_info ;;
+        13) clean_vps_logs ;;
         88) reboot_vps ;;
         *) return 1 ;;
     esac
