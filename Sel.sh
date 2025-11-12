@@ -41,7 +41,32 @@ get_system_info() {
     OS=$(grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)
     UPTIME=$(uptime -p | sed 's/up //')
     IPV4=$(hostname -I | awk '{print $1}')
-    DOMAIN=${IPV4}
+    
+    # Server RAM
+    RAM_TOTAL=$(free -h | awk 'NR==2{print $2}')
+    RAM_USED=$(free -h | awk 'NR==2{print $3}')
+    RAM_AVAIL=$(free -h | awk 'NR==2{print $7}')
+    
+    # CPU Core Information
+    CPU_CORES=$(nproc --all)
+    CPU_MODEL=$(grep -m 1 "model name" /proc/cpuinfo | cut -d':' -f2 | sed 's/^ *//')
+    
+    # ISP and City Information
+    if command -v curl &> /dev/null; then
+        IP_INFO=$(curl -s ipinfo.io)
+        ISP=$(echo "$IP_INFO" | grep '"org":' | cut -d'"' -f4)
+        CITY=$(echo "$IP_INFO" | grep '"city":' | cut -d'"' -f4)
+        COUNTRY=$(echo "$IP_INFO" | grep '"country":' | cut -d'"' -f4)
+        
+        # If any info is empty, set default
+        [ -z "$ISP" ] && ISP="Unknown"
+        [ -z "$CITY" ] && CITY="Unknown"
+        [ -z "$COUNTRY" ] && COUNTRY="Unknown"
+    else
+        ISP="curl not installed"
+        CITY="Unknown"
+        COUNTRY="Unknown"
+    fi
 }
 
 # Function to draw box with title and content
@@ -312,12 +337,15 @@ display_header() {
 ${WHITE} OS         : ${GREEN}${OS}${NC}
 ${WHITE} UPTIME     : ${GREEN}${UPTIME}${NC}
 ${WHITE} IPv4       : ${GREEN}${IPV4}${NC}
-${WHITE} DOMAIN     : ${GREEN}${DOMAIN}${NC}
+${WHITE} SERVER RAM : ${GREEN}${RAM_USED}/${RAM_TOTAL} (Avail: ${RAM_AVAIL})${NC}
+${WHITE} CPU CORES  : ${GREEN}${CPU_CORES} Cores${NC}
+${WHITE} ISP        : ${GREEN}${ISP}${NC}
+${WHITE} LOCATION   : ${GREEN}${CITY}, ${COUNTRY}${NC}
 EOF
 )
     draw_simple_box "$sysinfo" $BLUE
     
-    # Main menu - Updated with new options
+    # Main menu
     local mainmenu=$(cat <<EOF
 
 ${WHITE}[01] • 404 SSH MANAGER     [07] • DARK SSH MANAGER${NC}
@@ -373,7 +401,10 @@ handle_main_menu() {
         9) uninstall_zivpn ;;
         10) install_dotytunnel ;;
         11) install_selector ;;
-        *) return 1 ;;
+        *) 
+            draw_simple_box "${RED}Invalid Option in Main Menu!${NC}" $RED
+            return 1 
+            ;;
     esac
     return 0
 }
@@ -388,22 +419,26 @@ handle_tools_menu() {
         17) show_vpn_port_info ;;
         18) clean_vps_logs ;;
         88) reboot_vps ;;
-        *) return 1 ;;
+        *) 
+            draw_simple_box "${RED}Invalid Option in Tools Menu!${NC}" $RED
+            return 1 
+            ;;
     esac
     return 0
 }
 
 install_option() {
-    case $user_input in
+    local choice="$1"
+    case $choice in
         00|0)
             draw_simple_box "${GREEN}Thank you for using CHANNEL 404 TUNNEL!${NC}" $GREEN
             exit 0
             ;;
         1|2|3|4|5|6|7|8|9|10|11)
-            handle_main_menu "$user_input"
+            handle_main_menu "$choice"
             ;;
         12|13|14|15|16|17|18|88)
-            handle_tools_menu "$user_input"
+            handle_tools_menu "$choice"
             ;;
         *)
             draw_simple_box "${RED}Invalid Option! Please select 0-18 or 88${NC}" $RED
@@ -421,27 +456,16 @@ while true; do
     echo -en "${GREEN} Select menu : ${NC}"
     read -r user_input
     
-    case $user_input in
-        exit|00)
-            draw_simple_box "${GREEN}Thank you for using CHANNEL 404 TUNNEL!${NC}" $GREEN
-            echo -e "\n"
-            exit 0
-            ;;
-        *)
-            if [[ "$user_input" =~ ^[0-9]+$ ]]; then
-                if [ "$user_input" -eq 0 ]; then
-                    draw_simple_box "${GREEN}Thank you for using CHANNEL 404 TUNNEL!${NC}" $GREEN
-                    echo -e "\n"
-                    exit 0
-                fi
-                install_option "$user_input"
-                echo -e "\n${YELLOW}Press any key to continue...${NC}"
-                read -n 1 -s -r
-            else
-                draw_simple_box "${RED}Please enter a valid option number!${NC}" $RED
-                echo -e "\n${YELLOW}Press any key to continue...${NC}"
-                read -n 1 -s -r
-            fi
-            ;;
-    esac
+    # Input validation
+    if [[ ! "$user_input" =~ ^[0-9]+$ ]]; then
+        draw_simple_box "${RED}Please enter numbers only!${NC}" $RED
+        echo -e "\n${YELLOW}Press any key to continue...${NC}"
+        read -n 1 -s -r
+        continue
+    fi
+    
+    install_option "$user_input"
+    
+    echo -e "\n${YELLOW}Press any key to continue...${NC}"
+    read -n 1 -s -r
 done
