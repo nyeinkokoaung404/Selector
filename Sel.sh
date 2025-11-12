@@ -394,11 +394,20 @@ handle_tools_menu() {
 }
 
 install_option() {
-    case $1 in
-        00) return 0 ;;
-        1|2|3|4|5|6|7|8|9|10|11) handle_main_menu "$1" ;;
-        12|13|14|15|16|17|18|88) handle_tools_menu "$1" ;;
-        *) draw_simple_box "${RED}Invalid Option!${NC}" $RED ;;
+    case $user_input in
+        00|0)
+            draw_simple_box "${GREEN}Thank you for using CHANNEL 404 TUNNEL!${NC}" $GREEN
+            exit 0
+            ;;
+        1|2|3|4|5|6|7|8|9|10|11)
+            handle_main_menu "$user_input"
+            ;;
+        12|13|14|15|16|17|18|88)
+            handle_tools_menu "$user_input"
+            ;;
+        *)
+            draw_simple_box "${RED}Invalid Option! Please select 0-18 or 88${NC}" $RED
+            ;;
     esac
 }
 
