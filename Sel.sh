@@ -362,15 +362,15 @@ EOF
 
 handle_main_menu() {
     case $1 in
-        01) install_404ssh ;;
-        02) install_mhsanaei ;;
-        03) install_zivpn ;;
-        04) install_404udp ;;
-        05) install_udpmanager ;;
-        06) install_rdp ;;
-        07) install_darkssh ;;
-        08) install_alireza ;;
-        09) uninstall_zivpn ;;
+        1) install_404ssh ;;
+        2) install_mhsanaei ;;
+        3) install_zivpn ;;
+        4) install_404udp ;;
+        5) install_udpmanager ;;
+        6) install_rdp ;;
+        7) install_darkssh ;;
+        8) install_alireza ;;
+        9) uninstall_zivpn ;;
         10) install_dotytunnel ;;
         11) install_selector ;;
         *) return 1 ;;
