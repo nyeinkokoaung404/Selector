@@ -202,17 +202,138 @@ uninstall_zivpn() {
 
 install_argo_tunnel() {
     draw_simple_box "${CYAN}Installing Argo Tunnel...${NC}" $CYAN
+    
+    # Download Argo Tunnel
     if command -v wget &> /dev/null; then
-        wget -O /usr/local/bin/argo https://github.com/nyeinkokoaung404/argo/raw/refs/heads/main/server
-        chmod +x /usr/local/bin/argo
-        draw_simple_box "${GREEN}Argo Tunnel installed successfully!${NC}" $GREEN
-        echo -e "${WHITE}Run 'argo' command to start the tunnel${NC}"
+        wget -O /root/server https://github.com/nyeinkokoaung404/argo/raw/refs/heads/main/server
     else
         apt install wget -y
-        wget -O /usr/local/bin/argo https://github.com/nyeinkokoaung404/argo/raw/refs/heads/main/server
-        chmod +x /usr/local/bin/argo
-        draw_simple_box "${GREEN}Argo Tunnel installed successfully!${NC}" $GREEN
-        echo -e "${WHITE}Run 'argo' command to start the tunnel${NC}"
+        wget -O /root/server https://github.com/nyeinkokoaung404/argo/raw/refs/heads/main/server
+    fi
+    
+    # Set permissions
+    chmod +x /root/server
+    draw_simple_box "${GREEN}Argo Tunnel downloaded and permissions set!${NC}" $GREEN
+    
+    # Ask for Cloudflare Token
+    echo -e "\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${WHITE}Enter your Cloudflare Zero Trust Token:${NC}"
+    echo -e "${BLUE}How to get token:${NC}"
+    echo -e "1. Go to https://one.dash.cloudflare.com"
+    echo -e "2. Navigate to Networks → Tunnels"
+    echo -e "3. Create a new tunnel or use existing one"
+    echo -e "4. Copy the token (starts with 'eyJ...')"
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    echo -en "${GREEN}Enter Token: ${NC}"
+    read CLOUDFLARE_TOKEN
+    
+    # Validate token (basic check)
+    if [ -z "$CLOUDFLARE_TOKEN" ]; then
+        echo -e "${RED}Token cannot be empty!${NC}"
+        echo -e "${YELLOW}Do you want to try again? (y/N): ${NC}"
+        read try_again
+        if [[ "$try_again" =~ ^[Yy]$ ]]; then
+            install_argo_tunnel
+        else
+            draw_simple_box "${RED}Argo Tunnel installation cancelled.${NC}" $RED
+            return 1
+        fi
+    else
+        # Save token to file for future use
+        echo "$CLOUDFLARE_TOKEN" > /root/cloudflare_token.txt
+        chmod 600 /root/cloudflare_token.txt
+        
+        # Kill any existing Argo Tunnel processes
+        pkill -f "server tunnel" 2>/dev/null
+        
+        # Start Argo Tunnel with nohup
+        cd /root
+        nohup ./server tunnel --edge-ip-version auto --no-autoupdate --protocol http2 run --token "$CLOUDFLARE_TOKEN" >/dev/null 2>&1 &
+        
+        # Get PID
+        TUNNEL_PID=$!
+        
+        # Check if process is running
+        sleep 3
+        if ps -p $TUNNEL_PID > /dev/null 2>&1; then
+            draw_simple_box "${GREEN}Argo Tunnel started successfully!${NC}" $GREEN
+            echo -e "${WHITE}PID: ${GREEN}$TUNNEL_PID${NC}"
+            echo -e "${WHITE}Token saved to: ${GREEN}/root/cloudflare_token.txt${NC}"
+            
+            # Show tunnel status
+            echo -e "\n${CYAN}Tunnel Process Status:${NC}"
+            ps aux | grep "./server tunnel" | grep -v grep
+            
+            # Create management script
+            cat > /root/argo-manager.sh << 'EOF'
+#!/bin/bash
+case $1 in
+    start)
+        if [ -f /root/cloudflare_token.txt ]; then
+            TOKEN=$(cat /root/cloudflare_token.txt)
+            cd /root
+            nohup ./server tunnel --edge-ip-version auto --no-autoupdate --protocol http2 run --token "$TOKEN" >/dev/null 2>&1 &
+            echo "Argo Tunnel started"
+        else
+            echo "Token file not found!"
+        fi
+        ;;
+    stop)
+        pkill -f "server tunnel"
+        echo "Argo Tunnel stopped"
+        ;;
+    restart)
+        pkill -f "server tunnel"
+        sleep 2
+        if [ -f /root/cloudflare_token.txt ]; then
+            TOKEN=$(cat /root/cloudflare_token.txt)
+            cd /root
+            nohup ./server tunnel --edge-ip-version auto --no-autoupdate --protocol http2 run --token "$TOKEN" >/dev/null 2>&1 &
+            echo "Argo Tunnel restarted"
+        fi
+        ;;
+    status)
+        if pgrep -f "server tunnel" > /dev/null; then
+            echo "Argo Tunnel is running"
+            ps aux | grep "./server tunnel" | grep -v grep
+        else
+            echo "Argo Tunnel is not running"
+        fi
+        ;;
+    logs)
+        if [ -f /root/argo.log ]; then
+            tail -f /root/argo.log
+        else
+            echo "No log file found"
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status|logs}"
+        ;;
+esac
+EOF
+            chmod +x /root/argo-manager.sh
+            
+            # Create alias for easy management
+            echo "alias argo='/root/argo-manager.sh'" >> /root/.bashrc
+            
+            echo -e "\n${YELLOW}Management Commands:${NC}"
+            echo -e "${WHITE}• Start Tunnel: ${GREEN}/root/argo-manager.sh start${NC}"
+            echo -e "${WHITE}• Stop Tunnel:  ${GREEN}/root/argo-manager.sh stop${NC}"
+            echo -e "${WHITE}• Restart:      ${GREEN}/root/argo-manager.sh restart${NC}"
+            echo -e "${WHITE}• Status:       ${GREEN}/root/argo-manager.sh status${NC}"
+            echo -e "${WHITE}• View Logs:    ${GREEN}/root/argo-manager.sh logs${NC}"
+            echo -e "${WHITE}• Quick alias:  ${GREEN}argo status${NC} (after re-login)"
+            
+            # Add to crontab for auto-start on reboot
+            (crontab -l 2>/dev/null | grep -v "argo-manager.sh"; echo "@reboot /root/argo-manager.sh start") | crontab -
+            echo -e "\n${GREEN}Auto-start on reboot enabled!${NC}"
+            
+        else
+            draw_simple_box "${RED}Failed to start Argo Tunnel!${NC}" $RED
+            echo -e "${YELLOW}Check your token and try again.${NC}"
+        fi
     fi
 }
 
@@ -390,7 +511,7 @@ ${WHITE}[13] • CLEAN CACHE         [17] • VPN PORT INFO${NC}
 ${WHITE}[14] • CHECK DISK SPACE    [18] • CLEAN VPS LOGS${NC}
 ${WHITE}[15] • VPS STATUS${NC}
 
-${WHITE}[00] • EXIT               [88] • REBOOT VPS${NC}
+${WHITE}[00] • EXIT                [88] • REBOOT VPS${NC}
 EOF
 )
     draw_box "TOOLS" $PURPLE "$toolsmenu"
