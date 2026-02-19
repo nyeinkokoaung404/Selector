@@ -371,6 +371,70 @@ downgrade_ubuntu20() {
     fi
 }
 
+install_outline_manager() {
+    draw_simple_box "${PURPLE}Installing Outline Manager (PC)...${NC}" $PURPLE
+    
+    # Check if Docker is installed (Outline requires Docker)
+    if ! command -v docker &> /dev/null; then
+        echo -e "${YELLOW}Docker not found. Installing Docker first...${NC}"
+        apt update
+        apt install -y apt-transport-https ca-certificates curl software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        apt update
+        apt install -y docker-ce
+        systemctl start docker
+        systemctl enable docker
+        draw_simple_box "${GREEN}Docker installed successfully!${NC}" $GREEN
+    fi
+    
+    # Install Outline Server
+    draw_simple_box "${YELLOW}Installing Outline Server...${NC}" $YELLOW
+    sudo bash -c "$(wget -qO- https://raw.githubusercontent.com/Jigsaw-Code/outline-apps/master/server_manager/install_scripts/install_server.sh)"
+    
+    # Check installation status
+    if [ $? -eq 0 ]; then
+        draw_simple_box "${GREEN}Outline Manager installed successfully!${NC}" $GREEN
+        
+        # Display connection information
+        echo -e "\n${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${WHITE}Outline Server Information:${NC}"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        
+        # Find Outline API URL
+        if [ -f /opt/outline/access.txt ]; then
+            API_URL=$(cat /opt/outline/access.txt)
+            echo -e "${GREEN}API URL:${NC} $API_URL"
+            
+            # Save to file
+            echo "$API_URL" > /root/outline_api.txt
+            chmod 600 /root/outline_api.txt
+        fi
+        
+        # Show management commands
+        echo -e "\n${YELLOW}Outline Management Commands:${NC}"
+        echo -e "${WHITE}• Start Outline:  ${GREEN}docker start outline-server${NC}"
+        echo -e "${WHITE}• Stop Outline:   ${GREEN}docker stop outline-server${NC}"
+        echo -e "${WHITE}• Restart Outline:${GREEN}docker restart outline-server${NC}"
+        echo -e "${WHITE}• View Logs:      ${GREEN}docker logs outline-server${NC}"
+        echo -e "${WHITE}• API URL saved:  ${GREEN}/root/outline_api.txt${NC}"
+        
+        # Create management alias
+        echo "alias outline='docker logs outline-server'" >> /root/.bashrc
+        echo "alias outline-start='docker start outline-server'" >> /root/.bashrc
+        echo "alias outline-stop='docker stop outline-server'" >> /root/.bashrc
+        echo "alias outline-restart='docker restart outline-server'" >> /root/.bashrc
+        
+        echo -e "\n${GREEN}To use Outline Manager on PC:${NC}"
+        echo -e "1. Download Outline Manager from: https://getoutline.org/get-started/#step-3"
+        echo -e "2. Add server using the API URL above"
+        echo -e "3. Create access keys for your users"
+        
+    else
+        draw_simple_box "${RED}Outline Manager installation failed!${NC}" $RED
+    fi
+}
+
 install_darkssh() {
     draw_simple_box "${BLUE}Installing DARKSSH Manager...${NC}" $BLUE
     if command -v wget &> /dev/null; then
@@ -498,7 +562,7 @@ ${WHITE}[02] • MHSanaei 3X-UI      [08] • Alireza0 3X-UI${NC}
 ${WHITE}[03] • ZI-VPN INSTALL      [09] • ZI-VPN UNINSTALL${NC}
 ${WHITE}[04] • ARGO TUNNEL         [10] • DOTY TUNNEL${NC}
 ${WHITE}[05] • DOWNGRADE UBUNTU 20 [11] • SELECTOR TOOL${NC}
-${WHITE}[06] • RDP INSTALLER${NC}
+${WHITE}[06] • RDP INSTALLER       [12] • OUTLINE MANAGER${NC}
 EOF
 )
     draw_box "MENU" $GREEN "$mainmenu"
@@ -506,10 +570,10 @@ EOF
     # Tools menu
     local toolsmenu=$(cat <<EOF
 
-${WHITE}[12] • SYSTEM UPDATE       [16] • SERVER BENCHMARK${NC}
-${WHITE}[13] • CLEAN CACHE         [17] • VPN PORT INFO${NC}
-${WHITE}[14] • CHECK DISK SPACE    [18] • CLEAN VPS LOGS${NC}
-${WHITE}[15] • VPS STATUS${NC}
+${WHITE}[13] • SYSTEM UPDATE       [17] • SERVER BENCHMARK${NC}
+${WHITE}[14] • CLEAN CACHE         [18] • VPN PORT INFO${NC}
+${WHITE}[15] • CHECK DISK SPACE    [19] • CLEAN VPS LOGS${NC}
+${WHITE}[16] • VPS STATUS${NC}
 
 ${WHITE}[00] • EXIT                [88] • REBOOT VPS${NC}
 EOF
@@ -546,6 +610,7 @@ handle_main_menu() {
         9) uninstall_zivpn ;;
         10) install_dotytunnel ;;
         11) install_selector ;;
+        12) install_outline_manager ;;
         *) 
             draw_simple_box "${RED}Invalid Option in Main Menu!${NC}" $RED
             return 1 
@@ -556,13 +621,13 @@ handle_main_menu() {
 
 handle_tools_menu() {
     case $1 in
-        12) system_update ;;
-        13) clean_cache ;;
-        14) check_disk ;;
-        15) check_vps_status ;;
-        16) run_benchmark ;;
-        17) show_vpn_port_info ;;
-        18) clean_vps_logs ;;
+        13) system_update ;;
+        14) clean_cache ;;
+        15) check_disk ;;
+        16) check_vps_status ;;
+        17) run_benchmark ;;
+        18) show_vpn_port_info ;;
+        19) clean_vps_logs ;;
         88) reboot_vps ;;
         *) 
             draw_simple_box "${RED}Invalid Option in Tools Menu!${NC}" $RED
@@ -579,14 +644,14 @@ install_option() {
             draw_simple_box "${GREEN}Thank you for using CHANNEL 404 TUNNEL!${NC}" $GREEN
             exit 0
             ;;
-        1|2|3|4|5|6|7|8|9|10|11)
+        1|2|3|4|5|6|7|8|9|10|11|12)
             handle_main_menu "$choice"
             ;;
-        12|13|14|15|16|17|18|88)
+        13|14|15|16|17|18|19|88)
             handle_tools_menu "$choice"
             ;;
         *)
-            draw_simple_box "${RED}Invalid Option! Please select 0-18 or 88${NC}" $RED
+            draw_simple_box "${RED}Invalid Option! Please select 0-19 or 88${NC}" $RED
             ;;
     esac
 }
