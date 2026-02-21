@@ -1,5 +1,5 @@
-//profile-title:YLT ✍️ | KMKL ✔️✔️
+//profile-title:YLT ✍️ | KMKL ✔️
 //profile-update-interval:1
-//subscription-userinfo: upload=0; download=0; total=107374180000024000000000; expire=1802649600
+//subscription-userinfo: upload=0; download=0; total=1073741800000240000000; expire=1802649600
 
 ss://YWVzLTI1Ni1nY206OWlTY3NRL3Vnb1NSc1V2VkhSTWg5NVpQemhKM0RxTm1KQTNiTW85WXNRdz0@paid.gp.ylt-vvip.xyz:57800?type=tcp#One Key Stable YLT ✍️|
